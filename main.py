@@ -1,6 +1,7 @@
 import sqlite3
 import pygame
 import UIelements
+import database
 
 pygame.init()
 DISPLAYSURF = pygame.display.set_mode((800,800))
@@ -130,16 +131,18 @@ def identifyCriticalPaths(position):
 def resource_levelling():
     pass
 
-Immediate_Successors()
-StartEnd_Nodes()
-height(1)
-maxheight = maxheights()
-forwardPass(2)
-LFT_EndNode()
-backwardPass(maxheight-1)
-print(tree)
-CPtree = criticalPathTree()
-print(CPtree)
+#Immediate_Successors()
+#StartEnd_Nodes()
+#height(1)
+#maxheight = maxheights()
+#forwardPass(2)
+#LFT_EndNode()
+#backwardPass(maxheight-1)
+#print(tree)
+#CPtree = criticalPathTree()
+#print(CPtree)
 
-
+database.initialiseTables()
+database.insertHashword('hello goober', 123)
+print(database.checkmatch('hello goober', 123))
 

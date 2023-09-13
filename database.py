@@ -1,4 +1,5 @@
 import sqlite3
+import argon2
 
 def initialiseTables():
     connection = sqlite3.connect("activity-tables.db")
@@ -14,6 +15,23 @@ def initialiseTables():
                 EST INT,
                 LFT INT,
                 height INT)
+    ''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS passwords(
+                password varchar(50) PRIMARY KEY,
+                accountID INT)
+    ''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS accounts(
+                   accountID INTEGER PRIMARY KEY AUTOINCREMENT,
+                   username varchar(20),
+    )
+    ''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS accountsxtrees(
+                   accountID INT
+                   treeID INT
+    )
     ''')
 
 def update_Tree_fields(input):
@@ -55,3 +73,26 @@ def fetchTree():
     treeID = retrieve_treeID(output)
     returned_tree = retrieve_fields(output)
     return returned_tree, treeID
+
+def insertHashword(key, value):
+    index = argon2.hash_password(key.encode())
+    input = (index, value)
+    print(input)
+    connection = sqlite3.connect("activity-tables.db")
+    cursor = connection.cursor()
+    cursor.execute(
+        '''INSERT INTO passwords VALUES(?,?)''', input
+    )
+
+def checkmatch(key, value):
+    index = argon2.hash_password(key.encode())
+    input = (index, value)
+    connection = sqlite3.connect("activity-tables.db")
+    cursor = connection.cursor()
+    output = cursor.execute(
+        '''SELECT accountID FROM passwords WHERE password = ? AND accountID = ?''', input
+    ).fetchall()
+    if output != None:
+        return True
+    else:
+        return False
