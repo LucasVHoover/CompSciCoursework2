@@ -115,6 +115,9 @@ def criticalPathTree(tree):
             CPtree.remove(node)
     return CPtree
 
+def removeStartEnd(tree):
+    pass
+
 #NON FUNCTIONAL
 
 def identifyCriticalPaths(tree, position): 
