@@ -7,7 +7,7 @@ import pickle
 import logic
 
 pygame.init()
-WIN = pygame.display.set_mode((1600,1600))
+WIN = pygame.display.set_mode((1600,1000))
 pygame.display.set_caption('Hello World!')
 FPS = 60
 clock = pygame.time.Clock()
@@ -31,7 +31,7 @@ inputs = [['A',7, [], [], None, None, 0, 1],
   ['L',  12, ['J', 'K'],[], None, None,0,1]]
 
 
-MENU = 0
+MENU = 3
 
 #MENU 0 - Start Menu
 #MENU 1 - Login Screen
@@ -54,11 +54,11 @@ def setup(tree, view):
   tree, maxheight = logic.CPA(tree)
 
   if view == 0:
-    on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 300, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
-    on_screen.append(UIelements.ActivityNetwork(tree, 600, 400, 200, 0, 50, 50, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+    on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+    on_screen.append(UIelements.ActivityNetwork(tree, 600, 400, 550, 0, 50, 50, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
   elif view == 1:
-    on_screen.append(UIelements.GanttChart(tree, 600, 400, 300, 0, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
-    on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 300, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+    on_screen.append(UIelements.GanttChart(tree, 600, 400, 550, 0, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+    on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
   
   for each in on_screen:
     each.setupclasses()
@@ -74,17 +74,21 @@ def switchview(view):
 #switch the views between activity network and gantt chart
 
 
-AddRowButton = UIelements.Menu_button(350, 200, "Add Row", (0,0,0), (255,255,255), None)
+AddRowButton = UIelements.Menu_button(150, 650, "Add Row", (0,0,0), (255,255,255), None)
 BuildTree = UIelements.Menu_button(150, 600, "Build Tree", (0,0,0), (255,255,255), None)
-DelRowButton = UIelements.Menu_button(350, 300, "Delete Row", (0,0,0), (255,255,255), None)
+DelRowButton = UIelements.Menu_button(350, 650, "Delete Row", (0,0,0), (255,255,255), None)
 SwitchViewButton = UIelements.Menu_button(350, 600, "Switch View", (0,0,0), (255,255,255), None)
 
-SaveAsTree = UIelements.Menu_button(350, 400, "Save As", (0,0,0), (255,255,255), None)
-SaveTreeInput = UIelements.PopupInputBox(500,500, 200, 200, "", False)
-popupName = False
+SaveAsTree = UIelements.Menu_button(350, 700, "Save As", (0,0,0), (255,255,255), None)
+SaveTreeInput = UIelements.PopupInputBox(300,300,100,50,"",False)
+SavePopup = False
 
-inputBoxes = UIelements.InputBoxArray(0, 0, 300, 500, [])
-LoadTree = UIelements.Menu_button(350, 500, "Load Tree", (0,0,0), (255,255,255), None)
+LoadTree = UIelements.Menu_button(150, 700, "Load Tree", (0,0,0), (255,255,255), None)
+LoadTreeInput = UIelements.PopupInputBox(300,300,100,50,"",False)
+LoadPopup = False
+
+inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
+
 
 #inputBoxes.get_tree(inputs)
 #tree = inputBoxes.build_tree()
@@ -105,10 +109,10 @@ def saveTree(inputs, constraint, name):
   cursor.close()
   connection.close()
 
-def loadTree():
+def loadTree(name):
   connection = sqlite3.connect("activity-tables.db")
   cursor = connection.cursor()
-  check = (1, "Bill")
+  check = (1, name)
   output = cursor.execute("SELECT network, resourceConstraint FROM tree WHERE accountID = ? AND name = ?", check).fetchall()
   tree = pickle.loads(output[0][0])
   constraint = output[0][1]
@@ -118,72 +122,91 @@ def loadTree():
   return tree, constraint
 
 while True:
-  clock.tick(FPS)
-  WIN.fill((10,10,10))
-
-  mouse = pygame.mouse.get_pos()
-  if popupName:
-    SaveTreeInput.draw(WIN)
-    for event in pygame.event.get():
-      saveName = SaveTreeInput.handle_event(event)
-    if saveName != "":
-      inputBoxes.tree = []
-      tree = inputBoxes.build_tree()
-      SaveTreeInput.flipActive()
-      popupName = False
-      saveTree(tree, constraint, saveName)
-  else:
     clock.tick(FPS)
     WIN.fill((10,10,10))
-  
-    mouse = pygame.mouse.get_pos()
+    if MENU == 1:
+       pass
+    elif MENU == 3:
+        mouse = pygame.mouse.get_pos()
+        if SavePopup:
+            SaveTreeInput.draw(WIN)
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                saveName = SaveTreeInput.handle_event(event)
+            if saveName != "":
+                inputBoxes.tree = []
+                tree = inputBoxes.build_tree()
+                SaveTreeInput.flipActive()
+                SavePopup = False
+                saveTree(tree, constraint, saveName)
+        elif LoadPopup:
+            LoadTreeInput.draw(WIN)
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                loadName = LoadTreeInput.handle_event(event)
+            if loadName != "":
+                LoadTreeInput.flipActive()
+                LoadPopup = False
+                loadedtree, constraint = loadTree(loadName)
+                inputBoxes.get_tree(loadedtree)
+        
+        else:
+            clock.tick(FPS)
+            WIN.fill((10,10,10))
+        
+            mouse = pygame.mouse.get_pos()
 
-    inputBoxes.draw(WIN)
-    AddRowButton.draw(WIN)
-    BuildTree.draw(WIN)
-    DelRowButton.draw(WIN)
-    SaveAsTree.draw(WIN)
-    LoadTree.draw(WIN)
-    SwitchViewButton.draw(WIN)
-    for each in on_screen:
-      each.draw_arrows(WIN)
-      each.draw(WIN, constraint)
-      each.draw_scale(WIN)
+            inputBoxes.draw(WIN)
+            AddRowButton.draw(WIN)
+            BuildTree.draw(WIN)
+            DelRowButton.draw(WIN)
+            SaveAsTree.draw(WIN)
+            LoadTree.draw(WIN)
+            SwitchViewButton.draw(WIN)
+            for each in on_screen:
+                each.draw_arrows(WIN)
+                each.draw(WIN, constraint)
+                each.draw_scale(WIN)
 
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-          
-        inputBoxes.events(event)
-      
-        if event.type == pygame.MOUSEBUTTONDOWN:
-          if AddRowButton.change(mouse, False):
-            inputBoxes.AddRow()
-          if DelRowButton.change(mouse, False):
-            inputBoxes.DelRow()
-          if SwitchViewButton.change(mouse, False):
-            view = switchview(view)
-            on_screen = []
-            inputBoxes.tree = []
-            tree = inputBoxes.build_tree()
-            setup(tree, view)
-          if SaveAsTree.change(mouse, False):
-            SaveTreeInput.flipActive()
-            popupName = True
-            saveName = ""
-          if LoadTree.change(mouse, False):
-            loadedtree, constraint = loadTree()
-            inputBoxes.get_tree(loadedtree)
-          if BuildTree.change(mouse, False):
-            on_screen = []
-            inputBoxes.tree = [] #setup getters and setters in future
-            tree = inputBoxes.build_tree()
-            setup(tree,view)
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                
+                inputBoxes.events(event)
             
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if AddRowButton.change(mouse, False):
+                        inputBoxes.AddRow()
+                    if DelRowButton.change(mouse, False):
+                        inputBoxes.DelRow()
+                    if SwitchViewButton.change(mouse, False):
+                        view = switchview(view)
+                        on_screen = []
+                        inputBoxes.tree = []
+                        tree = inputBoxes.build_tree()
+                        setup(tree, view)
+                    if SaveAsTree.change(mouse, False):
+                        SaveTreeInput.flipActive()
+                        SavePopup = True
+                        saveName = ""
+                    if LoadTree.change(mouse, False):
+                        LoadTreeInput.flipActive()
+                        LoadPopup = True
+                        loadName = ""
+                    if BuildTree.change(mouse, False):
+                        on_screen = []
+                        inputBoxes.tree = [] #setup getters and setters in future
+                        tree = inputBoxes.build_tree()
+                        setup(tree,view)
+                
         
 
-  pygame.display.update()
+    pygame.display.update()
 
 
 
