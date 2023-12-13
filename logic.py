@@ -25,8 +25,8 @@ def Immediate_Successors(tree):
     return tree
 
 def StartEnd_Nodes(tree):
-    start_node = ['START', 0, [], [], 0, None, 1]
-    end_node = ['END', 0, [], [], None, None, 0]
+    start_node = ['START', 0, [], [], 0, None, 1, 0]
+    end_node = ['END', 0, [], [], None, None, 0, 0]
     for node in tree:
         if node[2] == []:
             node[2].append('START')
@@ -102,7 +102,8 @@ def backwardPass(tree, level):
         else:
             pass
     if level == 0:
-        print("finished")
+        pass
+        #print("finished")
     else:
         backwardPass(tree, level-1)
 
@@ -115,8 +116,12 @@ def criticalPathTree(tree):
             CPtree.remove(node)
     return CPtree
 
-def removeStartEnd(tree):
-    pass
+def StripStartEnd(tree):
+    tree = filter(lambda item: not(item[0] == "START" or item[0] == "END"), tree)
+    #print("output should be: ", list(tree))
+    return list(tree)
+
+
 
 #NON FUNCTIONAL
 
@@ -132,8 +137,15 @@ def identifyCriticalPaths(tree, position):
                     identifyCriticalPaths(tree, each)
     return tree
 
-def resource_levelling():
-    pass
-
+def CPA(tree):
+  tree = Immediate_Successors(tree)
+  tree = StartEnd_Nodes(tree)
+  tree = height(tree, 1)
+  maxheight = maxheights(tree)
+  tree = forwardPass(tree, 2, maxheight)
+  tree = LFT_EndNode(tree, maxheight)
+  tree = backwardPass(tree, maxheight-1)
+  #tree = StripStartEnd(tree)
+  return tree, maxheight
 
 

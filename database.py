@@ -1,6 +1,8 @@
 import sqlite3
-import argon2
+#import argon2
 import pickle
+
+#remember to add commits and closes
 
 def initialiseTables():
     connection = sqlite3.connect("activity-tables.db")
@@ -10,7 +12,8 @@ def initialiseTables():
                 TreeID INTEGER PRIMARY KEY,
                 AccountID INT,
                 name varchar(20),
-                network varchar(1000)   
+                network varchar(1000),
+                resourceConstraint INT
                 )
     ''')
     cursor.execute('''
@@ -24,6 +27,9 @@ def initialiseTables():
                    username varchar(20)
     )
     ''')
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 #def update_Tree_fields(input, treeID):
     #for node in input:
@@ -53,7 +59,7 @@ def additemstotree(tree, name, accountID):
     connection = sqlite3.connect("activity-tables.db")
     cursor = connection.cursor()
     cursor.execute(
-        '''INSERT INTO tree(AccountID, name, network) VALUES(?,?,?)''', input
+        '''INSERT INTO tree(AccountID, name, network) VALUES(?,?,?,?)''', input
     )
 
 def fetchTree(accountID, name):
