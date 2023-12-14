@@ -26,12 +26,12 @@ class Button:
   def __init__(self, x, y, text, colour, bg_colour, value_change):
     self.y = y
     self.x = x
-    self.text = text
+    self.displaytext = text
     self.colour = colour
     self.bg_colour = bg_colour
     self.value_change = value_change
     self.smallfont = pygame.font.SysFont('Corbel',35)
-    self.text = self.smallfont.render(self.text , True , self.colour, self.bg_colour)
+    self.text = self.smallfont.render(self.displaytext , True , self.colour, self.bg_colour)
     self.textRect = self.text.get_rect()
     self.textRect.center = (self.x, self.y)
     self.width = self.textRect.w
@@ -59,9 +59,24 @@ class Menu_button(Button):
 
 #this should be a change colour state button
 class GreenRedButton(Button):
-  def change(self, mouse, open):
-      pass
-    
+  def __init__(self, x, y, text, colour, bg_colour, value_change, on_colour):
+    super().__init__(x, y, text, colour, bg_colour, value_change)
+    self.on_colour = on_colour
+    self.active_colour = self.bg_colour
+  
+  def change(self, open):
+      if open:
+          self.active_colour = self.on_colour
+          self.text = self.smallfont.render(self.displaytext , True , self.colour, self.active_colour)
+          self.textRect = self.text.get_rect()
+      elif not open:
+          self.active_colour = self.bg_colour
+          self.text = self.smallfont.render(self.displaytext , True , self.colour, self.active_colour)
+          self.textRect = self.text.get_rect()
+
+  def setText(self, text): #set text to the username on account load in in the future
+    self.displaytext = text
+
 class ActivityNetwork:
   def __init__(self, tree, width, height, x, y, Nwidth, Nheight, Ncolour, Ncritcolour, Lcolour, Lwidth, maxheight): 
     self.x = x

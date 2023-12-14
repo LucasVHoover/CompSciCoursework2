@@ -7,7 +7,7 @@ import pickle
 import logic
 
 pygame.init()
-WIN = pygame.display.set_mode((1600,1000))
+WIN = pygame.display.set_mode((1500,1000))
 pygame.display.set_caption('Hello World!')
 FPS = 60
 clock = pygame.time.Clock()
@@ -54,7 +54,11 @@ Load_Tree = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+50, "Lo
 SignInMenu = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+100, "Log In/Sign Up", (0,0,0), (255,255,255), None)
 Help = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+150, "Help", (0,0,0), (255,255,255), None)
 
-ShowLogin = UIelements.Menu_button(100, 100, "Logged In", (0,0,0), (255,255,255), None) #Make this a change colour status 
+logo = pygame.image.load("coursework logo.png")
+logomask = pygame.mask.from_surface(logo)
+
+ShowLogin = UIelements.GreenRedButton(100, 100, "Logged In", (255,255,255), (255,0,0), None, (0,255,0)) #Make this a change colour status 
+ShowLogin.change(logged_in)
 
 #MENU 1 --------------------------------------------------------------------------------------------------------------------
 
@@ -64,12 +68,12 @@ infoBoxes = []
 infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2, "Username", (0,0,0), (255,255,255), None))
 infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+100, "Password", (0,0,0), (255,255,255), None))
 
-inputUsername = UIelements.InputBox(WIN.get_width()/2, WIN.get_height()/2+50, 100, 40)
-inputPassword = UIelements.InputBox(WIN.get_width()/2, WIN.get_height()/2+150, 100, 40)
+inputUsername = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/2+20, 100, 40) #these should be resizable. Make this so
+inputPassword = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/2+125, 100, 40)
 
-Login = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+200, "Login", (0,0,0), (255,255,255), None)
+LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+200, "Login", (0,0,0), (255,255,255), None)
 
-Sign_Up = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+250, "Sign Up", (0,0,0), (255,255,255), None)
+Sign_UpButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+250, "Sign Up", (0,0,0), (255,255,255), None)
 
 def Login():
   username = inputUsername.getText()
@@ -185,8 +189,7 @@ while True:
         Load_Tree.draw(WIN)
         SignInMenu.draw(WIN)
         Help.draw(WIN)
-
-
+        ShowLogin.draw(WIN)
       
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -206,15 +209,15 @@ while True:
 
         inputPassword.draw(WIN)
         inputUsername.draw(WIN)
-        Login.draw(WIN)
-        Sign_Up.draw(WIN)
+        LoginButton.draw(WIN)
+        Sign_UpButton.draw(WIN)
         
         for event in pygame.event.get():
           if event.type == QUIT:
               pygame.quit()
               sys.exit()
           if event.type == pygame.MOUSEBUTTONDOWN:
-              if Login.change(mouse, False):
+              if LoginButton.change(mouse, False):
                   MENU = 0
       
     elif MENU == 2:
