@@ -1,7 +1,7 @@
 import pygame
-import logic
-import random
-import time
+#import logic
+#import random
+#import time
 
 #include est adjustments
 
@@ -56,7 +56,12 @@ class Menu_button(Button):
       return True
     else:
       return False      
-      
+
+#this should be a change colour state button
+class GreenRedButton(Button):
+  def change(self, mouse, open):
+      pass
+    
 class ActivityNetwork:
   def __init__(self, tree, width, height, x, y, Nwidth, Nheight, Ncolour, Ncritcolour, Lcolour, Lwidth, maxheight): 
     self.x = x
@@ -81,17 +86,6 @@ class ActivityNetwork:
   def get_tree(self):
     return self.tree
 
-  #def CPA(self):
-  #  self.tree = logic.Immediate_Successors(self.tree)
-  #  self.tree = logic.StartEnd_Nodes(self.tree)
-  #  self.tree = logic.height(self.tree, 1)
-  #  self.maxheight = logic.maxheights(self.tree)
-  #  self.tree = logic.forwardPass(self.tree, 2, self.maxheight)
-  #  self.tree = logic.LFT_EndNode(self.tree, self.maxheight)
-  #  self.tree = logic.backwardPass(self.tree, self.maxheight-1)
-
-
-
   def setupclasses(self):
     for i in range(2, self.maxheight):
       levellen = 0
@@ -108,14 +102,14 @@ class ActivityNetwork:
           group.append(each)
       ydif = self.height/len(group)
       for i in range(len(group)):
-        self.nodes.append([xdif*(level-1), ydif*(i+1), group[i]])
-
+        self.nodes.append([xdif*(level-2), ydif*(i), group[i]])
+      
 #50, 50, (50,50,50)
 
   def draw(self, screen, constraint): # some kind of autoheight and width for text size would be very helpful
     for each in self.nodes:
       Nx = each[0] + self.x
-      Ny = each[1] + self.y
+      Ny = each[1] + self.y + 10
       Ntext = each[2][0] + str(each[2][4]) + str(each[2][1]) + str(each[2][5]) # needs work
       pygame.draw.rect(screen, (255,255,255), [Nx - 5, Ny - 5, self.Nwidth + 10, self.Nheight + 10])
       if (each[2][1] + each[2][4]) != each[2][5]:
@@ -154,6 +148,8 @@ class GanttChart(ActivityNetwork):
       if self.tree[i][0] != "START" and self.tree[i][0] != "END":
         self.nodes.append([self.xdif*(self.tree[i][4]), self.ydif*(i+1), self.tree[i]])
 
+    self.Nheight = self.height/(len(self.nodes)*2)
+
   def draw(self, screen, constraint): # some kind of autoheight and width for text size would be very helpful
     for each in self.nodes:
       Nx = each[0] + self.x
@@ -162,12 +158,12 @@ class GanttChart(ActivityNetwork):
       self.Nwidth = each[2][1] * self.xdif
       
       Ntext = each[2][0] + str(each[2][4]) + str(each[2][1]) + str(each[2][5]) # needs work
-      pygame.draw.rect(screen, (255,255,255), [Nx, Ny - 5, self.Nwidth + 10, self.Nheight + 10])
+      pygame.draw.rect(screen, (255,255,255), [Nx, Ny - 2.5, self.Nwidth + 2.5, self.Nheight + 2.5])
       if (each[2][1] + each[2][4]) != each[2][5]:
-        pygame.draw.rect(screen, self.Ncolour, [Nx + 5, Ny, self.Nwidth, self.Nheight])
+        pygame.draw.rect(screen, self.Ncolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
       else:
-        pygame.draw.rect(screen, self.Ncritcolour, [Nx + 5, Ny, self.Nwidth, self.Nheight])
-      blit_text(screen, Ntext, (Nx + 10 ,Ny + 10), pygame.font.Font('freesansbold.ttf', int(16)))
+        pygame.draw.rect(screen, self.Ncritcolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
+      blit_text(screen, Ntext, (Nx + 2.5 ,Ny + 2.5), pygame.font.Font('freesansbold.ttf', int(16)))
 
   def draw_arrows(self, screen):
     for examinednode in self.nodes:
@@ -239,7 +235,7 @@ class ResourceHistogram(ActivityNetwork):
 
 
 class InputBox:
-  def __init__(self, x, y, w, h, text="", interactable=True):
+  def __init__(self, x, y, w, h, text="", interactable=True):#interactable can be safely removed at later date
       self.colourInactive = (255,255,255)
       self.colourActive = (0,255,0)
       self.FONT = pygame.font.Font(None, 32)
