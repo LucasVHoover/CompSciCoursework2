@@ -185,6 +185,7 @@ while True:
     WIN.fill((10,10,10))
     mouse = pygame.mouse.get_pos()
     if MENU == 0:
+        WIN.blit(logo, (WIN.get_width()/2-565, WIN.get_height()/2-575))
         New_Tree.draw(WIN)
         Load_Tree.draw(WIN)
         SignInMenu.draw(WIN)
