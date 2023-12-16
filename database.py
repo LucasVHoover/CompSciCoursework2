@@ -2,7 +2,13 @@ import sqlite3
 #import argon2
 import pickle
 
+#do the argon khalyl thingymabob to be able to code in here and amongus
+
 #remember to add commits and closes
+
+def btecArgon(plaintext):
+  hash = plaintext
+  return hash
 
 def initialiseTables():
     connection = sqlite3.connect("activity-tables.db")
@@ -31,29 +37,6 @@ def initialiseTables():
     cursor.close()
     connection.close()
 
-#def update_Tree_fields(input, treeID):
-    #for node in input:
-    #    node.insert(0, treeID)
-    #for node in input:
-     #   node[3] = ' '.join(node[3])
-    #    node[4] = ' '.join(node[4])
-    #for i in range(len(input)):
-    #    input[i] = tuple(input[i])
-    #return input
-
-
-#def retrieve_fields(output):
-#    for i in range(len(output)):
-#        output[i] = list(output[i])
-#    for node in output:
-#        node[5] = node[5].split()
-#        node[6] = node[6].split()
-#    print(output)
-#    TreeID = output[0][0]
-##    for each in output:
-#            del each[:3]
-#    return output, TreeID
-
 def additemstotree(tree, name, accountID):
     input = (accountID, name, pickle.dumps(tree))
     connection = sqlite3.connect("activity-tables.db")
@@ -70,7 +53,7 @@ def fetchTree(accountID, name):
     return output
 
 def insertHashword(key, value):
-    index = argon2.hash_password(key.encode())
+    index = btecArgon(key.encode())
     input = (index, value)
     print(input)
     connection = sqlite3.connect("activity-tables.db")
@@ -78,16 +61,36 @@ def insertHashword(key, value):
     cursor.execute(
         '''INSERT INTO passwords VALUES(?,?)''', input
     )
-
+    connection.commit()
+    cursor.close()
+    connection.close()
+ 
 def checkmatch(key, value):
-    index = argon2.hash_password(key.encode())
+    index = btecArgon(key.encode())
     input = (index, value)
     connection = sqlite3.connect("activity-tables.db")
     cursor = connection.cursor()
     output = cursor.execute(
         '''SELECT accountID FROM passwords WHERE password = ? AND accountID = ?''', input
     ).fetchall()
+
+    connection.commit()
+    cursor.close()
+    connection.close()
+  
     if output != None:
         return True
     else:
         return False
+
+def fetchID(username):
+  connection = sqlite3.connect("activity-tables.db")
+  cursor = connection.cursor()
+  output = cursor.execute('''
+    SELECT accountID FROM accounts WHERE username = ?
+  ''', username).fetchall()
+  connection.commit()
+  cursor.close()
+  connection.close()
+  return output
+  
