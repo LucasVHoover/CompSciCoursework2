@@ -7,7 +7,7 @@ import pickle
 import logic
 
 pygame.init()
-WIN = pygame.display.set_mode((1500,1000))
+WIN = pygame.display.set_mode((1500,800))
 pygame.display.set_caption('Hello World!')
 FPS = 60
 clock = pygame.time.Clock()
@@ -65,46 +65,64 @@ ShowLogin.change(logged_in)
 username = ""
 password = ""
 infoBoxes = []
-infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2, "Username", (0,0,0), (255,255,255), None))
-infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+100, "Password", (0,0,0), (255,255,255), None))
+accountID = ""
+infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3, "Username", (0,0,0), (255,255,255), None))
+infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+100, "Password", (0,0,0), (255,255,255), None))
 
-inputUsername = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/2+20, 100, 40) #these should be resizable. Make this so
-inputPassword = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/2+125, 100, 40)
+inputUsername = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/3+20, 100, 40) #these should be resizable. Make this so
+inputPassword = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/3+125, 100, 40)
 
-LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+200, "Login", (0,0,0), (255,255,255), None)
+LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+200, "Login", (0,0,0), (255,255,255), None)
 
-Sign_UpButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+250, "Sign Up", (0,0,0), (255,255,255), None)
+Sign_UpButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+250, "Sign Up", (0,0,0), (255,255,255), None)
 
-def Login():
+def Login(): #NEED TO BRING ALL DATABASE FUNCTIONS OUT OF DATABASE.PY AND INTO MAIN BECAUSE DATABASES ARE STUPID
   username = inputUsername.getText()
   password = inputPassword.getText()
-  connection = sqlite3.connect("activity-tables.db")
-  cursor = connection.cursor()
-  AccountID = cursor.execute(
-    '''SELECT AcconutID
-       FROM accounts
-       WHERE username = ?''', username
-  )
-  #needs finishing requiring argon3 hash
+  print("trying")
+  try:
+    connection = sqlite3.connect("activity-tables.db")
+    cursor = connection.cursor()
+    tempID = database.fetchID(username)
 
-  connection.commit()
-  cursor.close()
-  connection.close()
+    if database.checkmatch(password, tempID):
+      accountID = tempID
+      logged_in = True
+      MENU = 0
+      ShowLogin.change(logged_in)
 
+      print("logged in")
+
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+    
+  except:
+    print("error")
+
+  
 def Sign_Up():
   username = inputUsername.getText()
   password = inputPassword.getText()
-  connection = sqlite3.connect("activity-tables.db")
-  cursor = connection.cursor()
-  cursor.execute('''
-    INSERT INTO accounts(username) VALUES(?)
-  ''', username)
-
-  #needs finishing requiring argon3 hash
+  try:
+    connection = sqlite3.connect("activity-tables.db")
+    cursor = connection.cursor()
+    cursor.execute('''
+      INSERT INTO accounts(username) VALUES(?)
+    ''', username)
   
-  connection.commit()
-  cursor.close()
-  connection.close()
+    accountID = database.fetchID(username)
+
+    database.insertHashword(password, accountID)
+    
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+    Login()
+  except:
+    print("error")
 
 #MENU 2 ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -180,6 +198,8 @@ def loadTree(name):
   connection.close()
   return tree, constraint
 
+#MAIN LOOP -----------------------------------------------------------------------------------------------------------------------------
+
 while True:
     clock.tick(FPS)
     WIN.fill((10,10,10))
@@ -217,9 +237,21 @@ while True:
           if event.type == QUIT:
               pygame.quit()
               sys.exit()
+
+          inputUsername.handle_event(event)
+          inputPassword.handle_event(event)
+          
           if event.type == pygame.MOUSEBUTTONDOWN:
               if LoginButton.change(mouse, False):
-                  MENU = 0
+                  Login()
+
+              if Sign_UpButton.change(mouse, False):
+                  Sign_Up()
+  
+                    
+
+  
+            
       
     elif MENU == 2:
         pass
