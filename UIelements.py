@@ -2,6 +2,8 @@ import pygame
 #import logic
 #import random
 #import time
+import sqlite3
+import pickle
 
 #include est adjustments
 
@@ -291,7 +293,6 @@ class InputBox:
  #     self.rect.w = width
 
   def draw(self, screen):
-    if self.interactable:
       # Blit the text.
       screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
       # Blit the rect.
@@ -419,5 +420,76 @@ class InputBoxArray:
       for each in box:
         each.draw(screen)
   
+class SaveBoxArray(InputBoxArray):
+    def AddRow(self, text):
+      if len(self.box_array) <= 15:
+        if self.box_array == []:
+          self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif, text[0], True),  #name
+                                 InputBox(self.x + self.xdif, self.y, self.xdif, self.ydif, text[1], False),
+                                 Menu_button(self.x + self.xdif*2 + 50, self.y + 17, "Load", (0,0,0), (255,255,255), None)]) #NEED TO MOVE THESE BOXES
+                                 #InputBox(self.x + self.xdif*2, self.y, self.xdif, self.ydif, text[2], False), #
+                                 #InputBox(self.x + self.xdif*3, self.y, self.xdif, self.ydif, text[3], False)]) #
+    
+        else:
+          nu_y = self.box_array[-1][0].getY() + self.ydif
+          self.box_array.append([InputBox(self.x, nu_y, self.xdif, self.ydif, text[0], True),  #name
+                                 InputBox(self.x + self.xdif, nu_y, self.xdif, self.ydif, text[1], False),
+                                 Menu_button(self.x + self.xdif*2 + 50, nu_y + 17, "Load", (0,0,0), (255,255,255), None)]) #NEED TO MOVE THESE BOXES
+                                 #InputBox(self.x + self.xdif*2, nu_y, self.xdif, self.ydif, text[2], False), #
+                                 #InputBox(self.x + self.xdif*3, nu_y, self.xdif, self.ydif, text[3], False)]) #
+          
+    def get_tree(self, accountID):
+        connection = sqlite3.connect("activity-tables.db")
+        cursor = connection.cursor()
+        output = cursor.execute('''
+          SELECT name, TreeID FROM tree WHERE accountID = ?
+        ''', (accountID[0][0],)).fetchall()
+        print(output)
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        self.box_array = []
+        for node in output:
+          data = [str(node[1]), node[0]]
+          self.tree.append(data)
+          self.AddRow(data)
+
+
+    def save_trees(self):
+        connection = sqlite3.connect("activity-tables.db")
+        cursor = connection.cursor()
+        for each in self.tree:
+          cursor.execute('''
+                    UPDATE tree SET name = ? WHERE TreeID = ?
+                         ''', each.reverse())
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+    def events(self, event, mouse):
+      for box in self.box_array:
+        for each in box[:-1]:
+          each.handle_event(event)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          if box[2].change(mouse, False):
+            TreeID = box[0].getText()
+            connection = sqlite3.connect("activity-tables.db")
+            cursor = connection.cursor()
+            output = cursor.execute('''
+              SELECT network, resourceConstraint FROM tree WHERE TreeID = ?
+            ''', (TreeID,)).fetchall()
+            connection.commit()
+            cursor.close()
+            connection.close()
+
+            print(output[0][0])
+
+            return pickle.loads(output[0][0]), output[0][1], 3, TreeID
+          
+      return [], None, 2, None
+
+
+    
 
     

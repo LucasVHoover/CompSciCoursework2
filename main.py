@@ -31,6 +31,16 @@ example = [['A',7, [], [], None, None, 0, 1],
   ['L',  12, ['J', 'K'],[], None, None,0,1]]
 
 
+connection = sqlite3.connect("activity-tables.db")
+cursor = connection.cursor()
+output = cursor.execute(
+    '''SELECT * FROM accounts'''
+).fetchall()
+print(output)
+connection.commit()
+cursor.close()
+connection.close()
+
 MENU = 0
 
 #MENU 0 - Start Menu
@@ -76,55 +86,117 @@ LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+200, 
 
 Sign_UpButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+250, "Sign Up", (0,0,0), (255,255,255), None)
 
-def Login(): #NEED TO BRING ALL DATABASE FUNCTIONS OUT OF DATABASE.PY AND INTO MAIN BECAUSE DATABASES ARE STUPID
-  username = inputUsername.getText()
-  password = inputPassword.getText()
-  print("trying")
-  try:
+def btecArgon(plaintext):
+  hash = plaintext
+  return hash
+
+def insertHashword(key, value):
+    print(value)
+    index = btecArgon(key)#this shoudld be key.encode() with argon activated
+    input = (index, int(value[0][0]))
+    print(input)
     connection = sqlite3.connect("activity-tables.db")
     cursor = connection.cursor()
-    tempID = database.fetchID(username)
+    cursor.execute(
+        '''INSERT INTO passwords VALUES(?,?)''', input
+    )
+    connection.commit()
+    cursor.close()
+    connection.close()
+ 
+def checkmatch(key, value):
+    index = btecArgon(key)#this should be key.encode() with argon activiated
+    input = (index, int(value[0][0]))
+    connection = sqlite3.connect("activity-tables.db")
+    cursor = connection.cursor()
+    output = cursor.execute(
+        '''SELECT accountID FROM passwords WHERE password = ? AND accountID = ?''', input
+    ).fetchall()
+    print(output)
 
-    if database.checkmatch(password, tempID):
-      accountID = tempID
-      logged_in = True
-      MENU = 0
-      ShowLogin.change(logged_in)
-
-      print("logged in")
 
     connection.commit()
     cursor.close()
     connection.close()
+  
+    if output != []:
+        return True
+    else:
+        return False
 
-    
-  except:
-    print("error")
+def fetchID(username):
+  print(username)
+  connection = sqlite3.connect("activity-tables.db")
+  cursor = connection.cursor() #WHERE username = ? (username,)
+  output = cursor.execute('''
+    SELECT * FROM accounts WHERE username = ?
+  ''', (username,)).fetchall()
+  print(output)
+  connection.commit()
+  cursor.close()
+  connection.close()
+  return output
+
+def Login(): #NEED TO BRING ALL DATABASE FUNCTIONS OUT OF DATABASE.PY AND INTO MAIN BECAUSE DATABASES ARE STUPID
+    username = inputUsername.getText()
+    password = inputPassword.getText()
+    print("trying")
+
+    try:
+
+        tempID = fetchID(username)
+
+        if checkmatch(password, tempID):
+            accountID = tempID
+            #logged_in = True
+            MENU = 0
+            ShowLogin.change(True)
+
+            print("logged in")
+
+            return MENU, accountID, True
+        else:
+            return 1, ""
+
+
+    except:
+        print("error")
+        return 1, ""
+        
 
   
 def Sign_Up():
-  username = inputUsername.getText()
-  password = inputPassword.getText()
-  try:
-    connection = sqlite3.connect("activity-tables.db")
-    cursor = connection.cursor()
-    cursor.execute('''
-      INSERT INTO accounts(username) VALUES(?)
-    ''', username)
-  
-    accountID = database.fetchID(username)
+    username = str(inputUsername.getText())
+    password = str(inputPassword.getText())
+    print(username)
 
-    database.insertHashword(password, accountID)
-    
-    connection.commit()
-    cursor.close()
-    connection.close()
+    try:
+        connection = sqlite3.connect("activity-tables.db")
+        cursor = connection.cursor()
+        cursor.execute('''
+            INSERT IGNORE INTO accounts(username) VALUES(?)
+        ''', (username,))
+        
+        connection.commit()
+        cursor.close()
+        connection.close()
 
-    Login()
-  except:
-    print("error")
+        accountID = fetchID(username)
+        print(accountID)
+
+        insertHashword(password, accountID)
+            
+        MENU , accountID, logged_in = Login()
+
+        return MENU, accountID, logged_in
+
+    except:
+        print("error")
+        return 1, ""
 
 #MENU 2 ----------------------------------------------------------------------------------------------------------------------------------------
+  
+SavedBoxes = UIelements.SaveBoxArray(100,100,500,500,[])
 
 #MENU 3 ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -164,39 +236,55 @@ SwitchViewButton = UIelements.Menu_button(350, 600, "Switch View", (0,0,0), (255
 
 SaveAsTree = UIelements.Menu_button(350, 700, "Save As", (0,0,0), (255,255,255), None)
 SaveTreeInput = UIelements.PopupInputBox(300,300,100,50,"",False)
+SaveTree = UIelements.Menu_button(150, 750, "Save", (0,0,0), (255,255,255), None)
 SavePopup = False
 
 LoadTree = UIelements.Menu_button(150, 700, "Load Tree", (0,0,0), (255,255,255), None)
-LoadTreeInput = UIelements.PopupInputBox(300,300,100,50,"",False)
-LoadPopup = False
 
 inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
 
 #inputBoxes.get_tree(example)
 
 def saveTree(inputs, constraint, name):
-  connection = sqlite3.connect("activity-tables.db")
-  cursor = connection.cursor()
-  input = (1, name, pickle.dumps(inputs), constraint)
-  cursor.execute(
-      '''INSERT INTO tree(AccountID, name, network, resourceConstraint) VALUES(?,?,?,?)''', input
-  )
-  print("Save Complete")
-  connection.commit()
-  cursor.close()
-  connection.close()
+    try:
+        connection = sqlite3.connect("activity-tables.db")
+        cursor = connection.cursor()
+        input = (accountID[0][0], name, pickle.dumps(inputs), constraint)
+        cursor.execute(
+            '''INSERT IGNORE INTO tree(AccountID, name, network, resourceConstraint) VALUES(?,?,?,?)''', input
+        )
+        print("Save Complete")
+        connection.commit()
+        cursor.close()
+        connection.close()
+        return True
+    except:
+        return False
+        
+def updateTree(inputs, constraint, TreeID):
+    connection = sqlite3.connect("activity-tables.db")
+    cursor = connection.cursor()
+    input = (pickle.dumps(inputs), constraint, TreeID)
+    cursor.execute(
+        '''UPDATE tree SET network = ?, resourceConstraint = ? WHERE TreeID = ?''', input
+    )
+    print("Save Complete")
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 def loadTree(name):
   connection = sqlite3.connect("activity-tables.db")
   cursor = connection.cursor()
-  check = (1, name)
-  output = cursor.execute("SELECT network, resourceConstraint FROM tree WHERE accountID = ? AND name = ?", check).fetchall()
+  check = (accountID[0][0], name)
+  output = cursor.execute("SELECT network, resourceConstraint, TreeID FROM tree WHERE accountID = ? AND name = ?", check).fetchall()
   tree = pickle.loads(output[0][0])
   constraint = output[0][1]
+  TreeID = output[0][2]
   connection.commit()
   cursor.close()
   connection.close()
-  return tree, constraint
+  return tree, constraint, TreeID
 
 #MAIN LOOP -----------------------------------------------------------------------------------------------------------------------------
 
@@ -218,9 +306,14 @@ while True:
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if New_Tree.change(mouse, False):
-                    MENU = 3
+                    if logged_in:
+                        MENU = 3
                 if SignInMenu.change(mouse, False):
                     MENU = 1
+                if Load_Tree.change(mouse, False):
+                    if logged_in:
+                        MENU = 2
+                        SavedBoxes.get_tree(accountID)
 
       
     elif MENU == 1:
@@ -243,10 +336,10 @@ while True:
           
           if event.type == pygame.MOUSEBUTTONDOWN:
               if LoginButton.change(mouse, False):
-                  Login()
+                  MENU, accountID, logged_in = Login()
 
               if Sign_UpButton.change(mouse, False):
-                  Sign_Up()
+                  MENU, accountID, logged_in = Sign_Up()
   
                     
 
@@ -254,7 +347,18 @@ while True:
             
       
     elif MENU == 2:
-        pass
+        SavedBoxes.draw(WIN)
+        for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                tree, constraint, MENU, TreeID = SavedBoxes.events(event, mouse)
+                if tree != []:
+                    inputBoxes.get_tree(tree)
+
+        
+
+
     elif MENU == 3:
         
         if SavePopup:
@@ -265,23 +369,11 @@ while True:
                     sys.exit()
                 saveName = SaveTreeInput.handle_event(event)
             if saveName != "":
-                inputBoxes.tree = []
-                tree = inputBoxes.build_tree()
-                SaveTreeInput.flipActive()
-                SavePopup = False
-                saveTree(tree, constraint, saveName)
-        elif LoadPopup:
-            LoadTreeInput.draw(WIN)
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                loadName = LoadTreeInput.handle_event(event)
-            if loadName != "":
-                LoadTreeInput.flipActive()
-                LoadPopup = False
-                loadedtree, constraint = loadTree(loadName)
-                inputBoxes.get_tree(loadedtree)
+                if saveTree(tree, constraint, saveName):
+                    inputBoxes.tree = []
+                    tree = inputBoxes.build_tree()
+                    SaveTreeInput.flipActive()
+                    SavePopup = False
         
         else:
             inputBoxes.draw(WIN)
@@ -291,6 +383,7 @@ while True:
             SaveAsTree.draw(WIN)
             LoadTree.draw(WIN)
             SwitchViewButton.draw(WIN)
+            SaveTree.draw(WIN)
             for each in on_screen:
                 each.draw_arrows(WIN)
                 each.draw(WIN, constraint)
@@ -319,14 +412,17 @@ while True:
                         SavePopup = True
                         saveName = ""
                     if LoadTree.change(mouse, False):
-                        LoadTreeInput.flipActive()
-                        LoadPopup = True
-                        loadName = ""
+                        MENU = 2
                     if BuildTree.change(mouse, False):
                         on_screen = []
                         inputBoxes.tree = [] #setup getters and setters in future
                         tree = inputBoxes.build_tree()
                         setup(tree,view)
+                    if SaveTree.change(mouse, False):
+                        tree = inputBoxes.build_tree()
+                        #need to save TreeID somewhere
+                        updateTree(tree, constraint, TreeID)
+
                 
         
 
