@@ -367,9 +367,10 @@ while True:
                     SavedBoxes.save_trees()
                     inputBoxes.get_tree(tree)
                     inputConstraint.setText(str(constraint))
-                if ReturnMain.change(mouse, False):
-                  SavedBoxes.save_trees()
-                  MENU = 0
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if ReturnMain.change(mouse, False):
+                        SavedBoxes.save_trees()
+                        MENU = 0
 
         
 
