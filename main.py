@@ -70,6 +70,8 @@ logomask = pygame.mask.from_surface(logo)
 ShowLogin = UIelements.GreenRedButton(100, 100, "Logged In", (255,255,255), (255,0,0), None, (0,255,0)) #Make this a change colour status 
 ShowLogin.change(logged_in)
 
+ReturnMain = UIelements.Menu_button(1350, 50, "Main Menu", (0,0,0), (255,255,255), None)
+
 #MENU 1 --------------------------------------------------------------------------------------------------------------------
 
 username = ""
@@ -243,6 +245,8 @@ LoadTree = UIelements.Menu_button(150, 700, "Load Tree", (0,0,0), (255,255,255),
 
 inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
 
+inputConstraint = UIelements.InputBox(250, 750, 100, 40)
+
 #inputBoxes.get_tree(example)
 
 def saveTree(inputs, constraint, name):
@@ -251,7 +255,7 @@ def saveTree(inputs, constraint, name):
         cursor = connection.cursor()
         input = (accountID[0][0], name, pickle.dumps(inputs), constraint)
         cursor.execute(
-            '''INSERT IGNORE INTO tree(AccountID, name, network, resourceConstraint) VALUES(?,?,?,?)''', input
+            '''INSERT INTO tree(AccountID, name, network, resourceConstraint) VALUES(?,?,?,?)''', input
         )
         print("Save Complete")
         connection.commit()
@@ -259,6 +263,7 @@ def saveTree(inputs, constraint, name):
         connection.close()
         return True
     except:
+        print("error")
         return False
         
 def updateTree(inputs, constraint, TreeID):
@@ -321,6 +326,7 @@ while True:
         for each in infoBoxes:
           each.draw(WIN)
 
+        ReturnMain.draw(WIN)
         inputPassword.draw(WIN)
         inputUsername.draw(WIN)
         LoginButton.draw(WIN)
@@ -340,6 +346,9 @@ while True:
 
               if Sign_UpButton.change(mouse, False):
                   MENU, accountID, logged_in = Sign_Up()
+            
+              if ReturnMain.change(mouse, False):
+                  MENU = 0
   
                     
 
@@ -348,13 +357,19 @@ while True:
       
     elif MENU == 2:
         SavedBoxes.draw(WIN)
+        ReturnMain.draw(WIN)
         for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
                     sys.exit()
                 tree, constraint, MENU, TreeID = SavedBoxes.events(event, mouse)
                 if tree != []:
+                    SavedBoxes.save_trees()
                     inputBoxes.get_tree(tree)
+                    inputConstraint.setText(str(constraint))
+                if ReturnMain.change(mouse, False):
+                  SavedBoxes.save_trees()
+                  MENU = 0
 
         
 
@@ -370,12 +385,13 @@ while True:
                 saveName = SaveTreeInput.handle_event(event)
             if saveName != "":
                 if saveTree(tree, constraint, saveName):
-                    inputBoxes.tree = []
+                    inputBoxes.setTree([])
                     tree = inputBoxes.build_tree()
                     SaveTreeInput.flipActive()
                     SavePopup = False
         
         else:
+            ReturnMain.draw(WIN)
             inputBoxes.draw(WIN)
             AddRowButton.draw(WIN)
             BuildTree.draw(WIN)
@@ -384,6 +400,7 @@ while True:
             LoadTree.draw(WIN)
             SwitchViewButton.draw(WIN)
             SaveTree.draw(WIN)
+            inputConstraint.draw(WIN)
             for each in on_screen:
                 each.draw_arrows(WIN)
                 each.draw(WIN, constraint)
@@ -395,6 +412,7 @@ while True:
                     sys.exit()
                 
                 inputBoxes.events(event)
+                inputConstraint.handle_event(event)
             
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if AddRowButton.change(mouse, False):
@@ -404,24 +422,35 @@ while True:
                     if SwitchViewButton.change(mouse, False):
                         view = switchview(view)
                         on_screen = []
-                        inputBoxes.tree = []
+                        inputBoxes.setTree([])
                         tree = inputBoxes.build_tree()
                         setup(tree, view)
                     if SaveAsTree.change(mouse, False):
+                        constraint = int(inputConstraint.getText())
+                        on_screen = []
+                        inputBoxes.setTree([]) 
+                        tree = inputBoxes.build_tree()
                         SaveTreeInput.flipActive()
                         SavePopup = True
                         saveName = ""
                     if LoadTree.change(mouse, False):
                         MENU = 2
                     if BuildTree.change(mouse, False):
+                        constraint = int(inputConstraint.getText())
                         on_screen = []
-                        inputBoxes.tree = [] #setup getters and setters in future
+                        inputBoxes.setTree([]) 
                         tree = inputBoxes.build_tree()
                         setup(tree,view)
                     if SaveTree.change(mouse, False):
-                        tree = inputBoxes.build_tree()
-                        #need to save TreeID somewhere
+                        constraint = int(inputConstraint.getText())
+                        on_screen = []
+                        inputBoxes.setTree([]) #POTENTIAL ISSUE POINT??
+                        tree = inputBoxes.build_tree() #need to save tree ID DONE?
                         updateTree(tree, constraint, TreeID)
+                    if ReturnMain.change(mouse, False):
+                        MENU = 0
+                    
+                        
 
                 
         

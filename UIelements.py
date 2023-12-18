@@ -304,6 +304,10 @@ class InputBox:
   def getText(self):
     return self.text
 
+  def setText(self, text):
+    self.text = text
+    self.txt_surface = self.FONT.render(self.text, True, self.color)
+
   def flipActive(self):
     if self.interactable:
       self.interactable = False
@@ -381,26 +385,21 @@ class InputBoxArray:
   def DelRow(self):
     if self.box_array != []:
       del self.box_array[-1]
-
-
-        
-  
   
   #DATA FORMAT ["name (input by user)", "duration  (input by user)", "immediate Predecessors (input by user)",  "immediate successors", EST, LFT, Height, resource]
-  
   #need to run exception handling for this bozo
-
   #fix exceptions
+  
   def build_tree(self):
       for row in self.box_array:
-        values = []
         name = row[0].getText()
         duration = int(row[1].getText())
         predecessors = row[2].getText().split(",")
         resource = int(row[3].getText())
-        if predecessors == ['']:
+        if predecessors == [''] or predecessors == ['START'] or predecessors == ['END']:
           predecessors = []
-        self.tree.append([name, duration, predecessors, [], None, None, 0, resource])
+        if name != "START" and name != "END":
+          self.tree.append([name, duration, predecessors, [], None, None, 0, resource])
 
       return self.tree
 
@@ -419,21 +418,26 @@ class InputBoxArray:
     for box in self.box_array:
       for each in box:
         each.draw(screen)
+
+  def setTree(self, tree):
+    self.tree = tree
   
+
+
 class SaveBoxArray(InputBoxArray):
     def AddRow(self, text):
       if len(self.box_array) <= 15:
         if self.box_array == []:
-          self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif, text[0], True),  #name
-                                 InputBox(self.x + self.xdif, self.y, self.xdif, self.ydif, text[1], False),
+          self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif, text[0], False),  #name
+                                 InputBox(self.x + self.xdif, self.y, self.xdif, self.ydif, text[1], True),
                                  Menu_button(self.x + self.xdif*2 + 50, self.y + 17, "Load", (0,0,0), (255,255,255), None)]) #NEED TO MOVE THESE BOXES
                                  #InputBox(self.x + self.xdif*2, self.y, self.xdif, self.ydif, text[2], False), #
                                  #InputBox(self.x + self.xdif*3, self.y, self.xdif, self.ydif, text[3], False)]) #
     
         else:
           nu_y = self.box_array[-1][0].getY() + self.ydif
-          self.box_array.append([InputBox(self.x, nu_y, self.xdif, self.ydif, text[0], True),  #name
-                                 InputBox(self.x + self.xdif, nu_y, self.xdif, self.ydif, text[1], False),
+          self.box_array.append([InputBox(self.x, nu_y, self.xdif, self.ydif, text[0], False),  #name
+                                 InputBox(self.x + self.xdif, nu_y, self.xdif, self.ydif, text[1], True),
                                  Menu_button(self.x + self.xdif*2 + 50, nu_y + 17, "Load", (0,0,0), (255,255,255), None)]) #NEED TO MOVE THESE BOXES
                                  #InputBox(self.x + self.xdif*2, nu_y, self.xdif, self.ydif, text[2], False), #
                                  #InputBox(self.x + self.xdif*3, nu_y, self.xdif, self.ydif, text[3], False)]) #
@@ -457,12 +461,17 @@ class SaveBoxArray(InputBoxArray):
 
 
     def save_trees(self):
+        self.tree = []
+        for row in self.box_array:
+            data = [row[0].getText(), row[1].getText()]
+            self.tree.append(data)
         connection = sqlite3.connect("activity-tables.db")
         cursor = connection.cursor()
         for each in self.tree:
+          input = [each[1],int(each[0])]
           cursor.execute('''
                     UPDATE tree SET name = ? WHERE TreeID = ?
-                         ''', each.reverse())
+                         ''', input)
         connection.commit()
         cursor.close()
         connection.close()
