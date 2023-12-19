@@ -30,17 +30,6 @@ example = [['A',7, [], [], None, None, 0, 1],
   ['K',  8, ['I'],[], None, None,0,1],
   ['L',  12, ['J', 'K'],[], None, None,0,1]]
 
-
-connection = sqlite3.connect("activity-tables.db")
-cursor = connection.cursor()
-output = cursor.execute(
-    '''SELECT * FROM accounts'''
-).fetchall()
-print(output)
-connection.commit()
-cursor.close()
-connection.close()
-
 MENU = 0
 
 #MENU 0 - Start Menu
@@ -209,9 +198,10 @@ tree = []
 
 
 def setup(tree, view):
-  print(tree)
+#runs the CPA algorithm on the tree and gets the output tree and maxheight
   tree, maxheight = logic.CPA(tree)
 
+#uses the on_screen list to contain the active objects 
   if view == 0:
     on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
     on_screen.append(UIelements.ActivityNetwork(tree, 800, 400, 550, 0, 50, 50, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
@@ -219,6 +209,7 @@ def setup(tree, view):
     on_screen.append(UIelements.GanttChart(tree, 800, 400, 550, 0, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
     on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
 
+#runs setupclasses method for the objects in on_screen
   for each in on_screen:
     each.setupclasses()
 
@@ -471,8 +462,4 @@ while True:
     pygame.display.update()
 
 
-
-#database.initialiseTables()
-#database.insertHashword('hello goober', 123)
-#print(database.checkmatch('hello goober', 123))
 

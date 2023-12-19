@@ -173,46 +173,63 @@ class ActivityNetwork:
     
 class GanttChart(ActivityNetwork):
   def setupclasses(self):
+    #generates spacing for each node along the defined height of the chart
     self.ydif = self.height/(len(self.tree) + 2) + ((self.height/(len(self.tree) + 2)/len(self.tree)))
+    #finds the total finish time
     self.duration = max([each[5] for each in self.tree])
+    #divides the length of the chart into spacings for the time unit
     self.xdif = self.width/self.duration
 
+    #removes the start or end node
     for each in self.tree:
       if each[0] == "START" or each[0] == "END":
         self.tree.remove(each)
     
+    #loops through the tree which is sorted by EST
     for i in range(len(sorted(self.tree, key = lambda x: x[6]))):
       if self.tree[i][0] != "START" and self.tree[i][0] != "END":
+        #adds the draw location of each node to the self.nodes array
         self.nodes.append([self.xdif*(self.tree[i][4]), self.ydif*(i+1), self.tree[i]])
 
+    #sets the height of each node
     self.Nheight = self.height/(len(self.nodes)*2)
 
-  def draw(self, screen, constraint): # some kind of autoheight and width for text size would be very helpful
+  def draw(self, screen, constraint):
+    #loops through the nodes 
     for each in self.nodes:
       Nx = each[0] + self.x
       Ny = each[1] + self.y
+      #gets the x and y pos
 
+      #finds the width
       self.Nwidth = each[2][1] * self.xdif
       
+      #gets the text
       Ntext = each[2][0] + str(each[2][4]) + str(each[2][1]) + str(each[2][5]) # needs work
+      #draws rects
       pygame.draw.rect(screen, (255,255,255), [Nx, Ny - 2.5, self.Nwidth + 2.5, self.Nheight + 2.5])
       if (each[2][1] + each[2][4]) != each[2][5]:
         pygame.draw.rect(screen, self.Ncolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
       else:
         pygame.draw.rect(screen, self.Ncritcolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
+      #blits the text
       blit_text(screen, Ntext, (Nx + 2.5 ,Ny + 2.5), pygame.font.Font('freesansbold.ttf', int(16)))
 
   def draw_arrows(self, screen):
     for examinednode in self.nodes:
+      #finds successors
       successors_x_y = []
       successors = examinednode[2][3]
+      #get successor position
       for nodes in self.nodes:
         for each in successors:
           if nodes[2][0] == each:
             successors_x_y.append((nodes[0] + self.x,nodes[1] + self.Nheight/2 + self.y))
       for items in successors_x_y:
-        pygame.draw.line(screen, self.Lcolour, (examinednode[0] + (examinednode[2][1]*self.xdif) + self.x, examinednode[1] + self.Nheight/2 + self.y), (examinednode[0] + (examinednode[2][1]*self.xdif + self.x) + self.y, items[1]), self.Lwidth)
-        
+        #draw vertical
+        pygame.draw.line(screen, self.Lcolour, (examinednode[0] + (examinednode[2][1]*self.xdif) + self.x, examinednode[1] + self.Nheight/2 + self.y), 
+                         (examinednode[0] + (examinednode[2][1]*self.xdif + self.x) + self.y, items[1]), self.Lwidth)
+        #draw horizontal
         pygame.draw.line(screen, self.Lcolour, ((examinednode[0] + (examinednode[2][1]*self.xdif + self.x), items[1])), items, self.Lwidth)
 
   def draw_scale(self, screen):
@@ -221,7 +238,7 @@ class GanttChart(ActivityNetwork):
     points = length//5 + 1
     scale = self.xdif * 5
 
-    
+    #draws each point on scale
     for i in range(points + 1):
       pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20)), (scale*i + self.x, (self.ydif -10 + self.y)), 10)
       blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30)), pygame.font.Font('freesansbold.ttf', int(16)))
@@ -231,6 +248,7 @@ class GanttChart(ActivityNetwork):
 class ResourceHistogram(ActivityNetwork):
   #put constraint into self setup init super
 
+  #explain theese in write up gooberino
   def setupclasses(self):
     pass
 
@@ -238,23 +256,30 @@ class ResourceHistogram(ActivityNetwork):
     pass
   
   def draw(self, screen, constraint):
+    #defines the x and y difs
     self.xdif = self.width/max([each[5] for each in self.tree])
     self.ydif = self.height/(max([each[7] for each in self.tree])+self.maxheight) #rebuild this at somepoint to find the highest point of resource usage within the histogram instead of this hacky solution *****
     
+    #loops up to the finishing time of the tree by time intervals
     for i in range(max([each[5] for each in self.tree]) + 1):
+      #defines the set for the active task at each time interval
       set = []
       for each in self.tree:
+        #adds every active task to the set list
         if i > each[4] and i <= (each[4] + each[1]):
           if (each[5] - each[1] - each[4]) == 0:
             set.append([each[0], each[7], each[5] - each[1] - each[4], (255,0,0)])
           else:
             set.append([each[0], each[7], each[5] - each[1] - each[4], (255,255,255)])
+      #sorts set by whether the task is critical or not using lambda function
       set = sorted(set, key = lambda x: x[2])
       height = 0
+      #draws every active task in set
       for each in set:
         pygame.draw.rect(screen, each[3], [self.x + (self.xdif*(i-1)), self.y + (self.height - (self.ydif*height) - self.ydif*each[1]), self.xdif, self.ydif*each[1]], 0)
         blit_text(screen, each[0], (self.x + (self.xdif*(i-1)), self.y + (self.height - (self.ydif*height) - self.ydif*each[1])), pygame.font.Font('freesansbold.ttf'), int(16))
         height += each[1]
+    #draws the constraint line
     pygame.draw.line(screen, (0,255,0), (self.x, self.y + (self.height - self.ydif*constraint - 5)), (self.x + self.width, self.y + (self.height - self.ydif*constraint - 5)), 5)
 
       #make labels, add colour coding maybe?
@@ -265,7 +290,7 @@ class ResourceHistogram(ActivityNetwork):
     points = length//5 + 1
     scale = self.xdif * 5
 
-
+    #draws each point on the scale.
     for i in range(points):
       pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20)), (scale*i + self.x, (self.ydif -10 + self.y)), 10)
       blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30)), pygame.font.Font('freesansbold.ttf', int(16)))
