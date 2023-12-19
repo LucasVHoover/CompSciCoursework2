@@ -8,8 +8,10 @@ import pickle
 #include est adjustments
 
 def blit_text(surface, text, pos, font, color=pygame.Color('white')):
-    words = [word.split(')(') for word in text.splitlines()]  # 2D array where each row is a list of words.
-    space = font.size(' ')[0]  # The width of a space.
+  # 2D array where each row is a list of words.
+    words = [word.split(')(') for word in text.splitlines()]  
+   # The width of a space.
+    space = font.size(' ')[0] 
     max_width, max_height = surface.get_size()
     x, y = pos
     for line in words:
@@ -59,13 +61,14 @@ class Menu_button(Button):
     else:
       return False      
 
-#this should be a change colour state button
 class GreenRedButton(Button):
   def __init__(self, x, y, text, colour, bg_colour, value_change, on_colour):
+    #adds the on_colour and active_colour attributes to the child class
     super().__init__(x, y, text, colour, bg_colour, value_change)
     self.on_colour = on_colour
     self.active_colour = self.bg_colour
-  
+    
+    #now changes the colour of the element based on a True or False input
   def change(self, open):
       if open:
           self.active_colour = self.on_colour
@@ -76,10 +79,12 @@ class GreenRedButton(Button):
           self.text = self.smallfont.render(self.displaytext , True , self.colour, self.active_colour)
           self.textRect = self.text.get_rect()
 
-  def setText(self, text): #set text to the username on account load in in the future
+    #setter for the display text
+  def setText(self, text): 
     self.displaytext = text
 
 class ActivityNetwork:
+  #initialisation
   def __init__(self, tree, width, height, x, y, Nwidth, Nheight, Ncolour, Ncritcolour, Lcolour, Lwidth, maxheight): 
     self.x = x
     self.y = y
@@ -96,7 +101,7 @@ class ActivityNetwork:
     self.Lwidth = Lwidth
     self.Ncritcolour = Ncritcolour
 
-
+  #getters
   def getnodes(self):
     return self.nodes
   
@@ -104,20 +109,26 @@ class ActivityNetwork:
     return self.tree
 
   def setupclasses(self):
+    #loops through each height of the tree
     for i in range(2, self.maxheight):
       levellen = 0
+      #adds up the amount of nodes at the height
       for each in self.tree:
         if each[6] == i:
           levellen += 1
+          #adds the height and the amount of nodes at the height to an array
       self.levelheights.append([levellen, i])
-    
+
+    #breaking up the defined width for the network into segments based on how many is needed
     xdif = self.width/len(self.levelheights)
     for level in range(2, self.maxheight):
       group = []
       for each in self.tree:
         if each[6] == level:
           group.append(each)
+      #breaking up the height of the network into segments depending on the amount of nodes at a height
       ydif = self.height/len(group)
+      #appending the positional information for each node to this array
       for i in range(len(group)):
         self.nodes.append([xdif*(level-2), ydif*(i), group[i]])
       
@@ -125,25 +136,34 @@ class ActivityNetwork:
 
   def draw(self, screen, constraint): # some kind of autoheight and width for text size would be very helpful
     for each in self.nodes:
+      #gets the pos of each node to be rendered from self.nodes
       Nx = each[0] + self.x
       Ny = each[1] + self.y + 10
+      #creates the text that will be in each nodes box
       Ntext = each[2][0] + str(each[2][4]) + str(each[2][1]) + str(each[2][5]) # needs work
+      #draws the box for the node
       pygame.draw.rect(screen, (255,255,255), [Nx - 5, Ny - 5, self.Nwidth + 10, self.Nheight + 10])
       if (each[2][1] + each[2][4]) != each[2][5]:
         pygame.draw.rect(screen, self.Ncolour, [Nx, Ny, self.Nwidth, self.Nheight])
       else:
         pygame.draw.rect(screen, self.Ncritcolour, [Nx, Ny, self.Nwidth, self.Nheight])
+      #blits the text using the blit_text function
       blit_text(screen, Ntext, (Nx + 10 ,Ny + 10), pygame.font.Font('freesansbold.ttf', int(16)))
 
   def draw_arrows(self, screen):
+    #loops through each node
     for examinednode in self.nodes:
+      #defines the lits for the positions of the successors of the node
       successors_x_y = []
+      #gets the sucessors
       successors = examinednode[2][3]
       for nodes in self.nodes:
         for each in successors:
+          #gets the position of the sucessor nodes
           if nodes[2][0] == each:
             successors_x_y.append((nodes[0] + self.Nwidth/2 + self.x ,nodes[1] + self.Nheight/2 + self.y))
       for items in successors_x_y:
+        #draws a line from the node to ever successor
         pygame.draw.line(screen, self.Lcolour, (examinednode[0] + self.Nwidth/2 + self.x,examinednode[1] + self.Nheight/2 + self.y), items, self.Lwidth)
 
   #implement moving around screen functions and defined borders where stuff is no longer drawn

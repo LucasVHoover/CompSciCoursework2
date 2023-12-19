@@ -245,13 +245,13 @@ LoadTree = UIelements.Menu_button(150, 700, "Load Tree", (0,0,0), (255,255,255),
 
 inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
 
-<<<<<<< HEAD
-inputBoxes.get_tree(example)
-=======
+#<<<<<<< HEAD
+#inputBoxes.get_tree(example)
+#=======
 inputConstraint = UIelements.InputBox(250, 750, 100, 40)
 
 #inputBoxes.get_tree(example)
->>>>>>> dd4c175c081fe8de7156549e7f7e72780435e2d7
+#>>>>>>> dd4c175c081fe8de7156549e7f7e72780435e2d7
 
 def saveTree(inputs, constraint, name):
     try:
@@ -410,7 +410,8 @@ while True:
                 each.draw_arrows(WIN)
                 each.draw(WIN, constraint)
                 each.draw_scale(WIN)
-
+              
+          #gets events (inputs)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -418,8 +419,10 @@ while True:
                 
                 inputBoxes.events(event)
                 inputConstraint.handle_event(event)
-            
+              
+              #if the event is a click
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                  #if the mouse is on the location of the button
                     if AddRowButton.change(mouse, False):
                         inputBoxes.AddRow()
                     if DelRowButton.change(mouse, False):
@@ -440,8 +443,12 @@ while True:
                         saveName = ""
                     if LoadTree.change(mouse, False):
                         MENU = 2
+                        on_screen = []
                     if BuildTree.change(mouse, False):
-                        constraint = int(inputConstraint.getText())
+                        try:
+                          constraint = int(inputConstraint.getText())
+                        except:
+                          constraint = 0
                         on_screen = []
                         inputBoxes.setTree([]) 
                         tree = inputBoxes.build_tree()
@@ -454,6 +461,7 @@ while True:
                         updateTree(tree, constraint, TreeID)
                     if ReturnMain.change(mouse, False):
                         MENU = 0
+                        on_screen = []
                     
                         
 
