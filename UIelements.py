@@ -297,7 +297,7 @@ class ResourceHistogram(ActivityNetwork):
 
 
 class InputBox:
-  def __init__(self, x, y, w, h, text="", interactable=True):#interactable can be safely removed at later date
+  def __init__(self, x, y, w, h, text="", interactable=True):
       self.colourInactive = (255,255,255)
       self.colourActive = (0,255,0)
       self.FONT = pygame.font.Font(None, 32)
@@ -320,12 +320,15 @@ class InputBox:
           # Change the current color of the input box.
           self.color = self.colourActive if self.active else self.colourInactive
       if event.type == pygame.KEYDOWN:
+          #if it is active
           if self.active:
               #if event.key == pygame.K_RETURN:
               #    print(self.text)
               #    self.text = ''
+              #get the key input
               if event.key == pygame.K_BACKSPACE:
                   self.text = self.text[:-1]
+                  #changes the text based on input
               elif self.txt_surface.get_width() + 10 < self.rect.w:
                   self.text += event.unicode.rstrip()
 
@@ -400,7 +403,9 @@ class InputBoxArray:
     self.box_array = []
   
   def AddRow(self, text = None):
+    #makes sure the amonut of rows isnt too large
     if text == None and len(self.box_array) <= 15:
+        #if it is the first row
         if self.box_array == []:
           self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif),  #name
                                  InputBox(self.x + self.xdif, self.y, self.xdif, self.ydif), #duration
@@ -408,11 +413,13 @@ class InputBoxArray:
                                  InputBox(self.x + self.xdif*3, self.y, self.xdif, self.ydif)]) #resource
   
         else:
+        #if it is not the first row
           nu_y = self.box_array[-1][0].getY() + self.ydif
           self.box_array.append([InputBox(self.x, nu_y, self.xdif, self.ydif),  #name
                                  InputBox(self.x + self.xdif, nu_y, self.xdif, self.ydif), #duration
                                  InputBox(self.x + self.xdif*2, nu_y, self.xdif, self.ydif), #predecessors
                                  InputBox(self.x + self.xdif*3, nu_y, self.xdif, self.ydif)]) #resource
+    #if the row already has a values for the fields
     elif len(self.box_array) <= 15:
         if self.box_array == []:
           self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif, text[0]),  #name
@@ -428,6 +435,7 @@ class InputBoxArray:
                                  InputBox(self.x + self.xdif*3, nu_y, self.xdif, self.ydif, text[3])]) #resource
 
   def DelRow(self):
+    #if the box_array isnt empty, delete the last element.
     if self.box_array != []:
       del self.box_array[-1]
   
@@ -436,16 +444,20 @@ class InputBoxArray:
   #fix exceptions
   
   def build_tree(self):
+      #loops through each row in the table
       for row in self.box_array:
+        #runs the get text getter to get the values stored in each column
         name = row[0].getText()
         duration = int(row[1].getText())
         predecessors = row[2].getText().split(",")
         resource = int(row[3].getText())
+        #clears any empty predecessors or any leftover START or END dependancies from CPA
         if predecessors == [''] or predecessors == ['START'] or predecessors == ['END']:
           predecessors = []
+        #adds the contents of the table to the self.tree array in the correct data format for CPA algorithm
         if name != "START" and name != "END":
           self.tree.append([name, duration, predecessors, [], None, None, 0, resource])
-
+      #returns self.tree
       return self.tree
 
   def get_tree(self, tree):

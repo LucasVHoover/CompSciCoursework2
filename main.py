@@ -147,16 +147,16 @@ def Login(): #NEED TO BRING ALL DATABASE FUNCTIONS OUT OF DATABASE.PY AND INTO M
 
             return MENU, accountID, True
         else:
-            return 1, ""
+            return 1, "", True
 
 
     except:
         print("error")
-        return 1, ""
+        return 1, "", True
         
 
   
-def Sign_Up():
+def Sign_Up(): #SIGN UP NEEDS FIXING DOES NOT WORK AS NOW
     username = str(inputUsername.getText())
     password = str(inputPassword.getText())
     print(username)
@@ -183,7 +183,7 @@ def Sign_Up():
 
     except:
         print("error")
-        return 1, ""
+        return 1, "", True
 
 #MENU 2 ----------------------------------------------------------------------------------------------------------------------------------------
   
