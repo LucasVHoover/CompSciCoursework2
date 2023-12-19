@@ -172,7 +172,7 @@ LoadPopup = False
 
 inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
 
-#inputBoxes.get_tree(example)
+inputBoxes.get_tree(example)
 
 def saveTree(inputs, constraint, name):
   connection = sqlite3.connect("activity-tables.db")
