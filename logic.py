@@ -148,4 +148,7 @@ def CPA(tree):
   #tree = StripStartEnd(tree)
   return tree, maxheight
 
+#THIS NEEDS DOING
+def VerifyNoError(tree):
+    pass
 
