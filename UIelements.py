@@ -173,63 +173,46 @@ class ActivityNetwork:
     
 class GanttChart(ActivityNetwork):
   def setupclasses(self):
-    #generates spacing for each node along the defined height of the chart
     self.ydif = self.height/(len(self.tree) + 2) + ((self.height/(len(self.tree) + 2)/len(self.tree)))
-    #finds the total finish time
     self.duration = max([each[5] for each in self.tree])
-    #divides the length of the chart into spacings for the time unit
     self.xdif = self.width/self.duration
 
-    #removes the start or end node
     for each in self.tree:
       if each[0] == "START" or each[0] == "END":
         self.tree.remove(each)
     
-    #loops through the tree which is sorted by EST
     for i in range(len(sorted(self.tree, key = lambda x: x[6]))):
       if self.tree[i][0] != "START" and self.tree[i][0] != "END":
-        #adds the draw location of each node to the self.nodes array
         self.nodes.append([self.xdif*(self.tree[i][4]), self.ydif*(i+1), self.tree[i]])
 
-    #sets the height of each node
     self.Nheight = self.height/(len(self.nodes)*2)
 
-  def draw(self, screen, constraint):
-    #loops through the nodes 
+  def draw(self, screen, constraint): # some kind of autoheight and width for text size would be very helpful
     for each in self.nodes:
       Nx = each[0] + self.x
       Ny = each[1] + self.y
-      #gets the x and y pos
 
-      #finds the width
       self.Nwidth = each[2][1] * self.xdif
       
-      #gets the text
       Ntext = each[2][0] + str(each[2][4]) + str(each[2][1]) + str(each[2][5]) # needs work
-      #draws rects
       pygame.draw.rect(screen, (255,255,255), [Nx, Ny - 2.5, self.Nwidth + 2.5, self.Nheight + 2.5])
       if (each[2][1] + each[2][4]) != each[2][5]:
         pygame.draw.rect(screen, self.Ncolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
       else:
         pygame.draw.rect(screen, self.Ncritcolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
-      #blits the text
       blit_text(screen, Ntext, (Nx + 2.5 ,Ny + 2.5), pygame.font.Font('freesansbold.ttf', int(16)))
 
   def draw_arrows(self, screen):
     for examinednode in self.nodes:
-      #finds successors
       successors_x_y = []
       successors = examinednode[2][3]
-      #get successor position
       for nodes in self.nodes:
         for each in successors:
           if nodes[2][0] == each:
             successors_x_y.append((nodes[0] + self.x,nodes[1] + self.Nheight/2 + self.y))
       for items in successors_x_y:
-        #draw vertical
-        pygame.draw.line(screen, self.Lcolour, (examinednode[0] + (examinednode[2][1]*self.xdif) + self.x, examinednode[1] + self.Nheight/2 + self.y), 
-                         (examinednode[0] + (examinednode[2][1]*self.xdif + self.x) + self.y, items[1]), self.Lwidth)
-        #draw horizontal
+        pygame.draw.line(screen, self.Lcolour, (examinednode[0] + (examinednode[2][1]*self.xdif) + self.x, examinednode[1] + self.Nheight/2 + self.y), (examinednode[0] + (examinednode[2][1]*self.xdif + self.x) + self.y, items[1]), self.Lwidth)
+        
         pygame.draw.line(screen, self.Lcolour, ((examinednode[0] + (examinednode[2][1]*self.xdif + self.x), items[1])), items, self.Lwidth)
 
   def draw_scale(self, screen):
@@ -238,7 +221,7 @@ class GanttChart(ActivityNetwork):
     points = length//5 + 1
     scale = self.xdif * 5
 
-    #draws each point on scale
+    
     for i in range(points + 1):
       pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20)), (scale*i + self.x, (self.ydif -10 + self.y)), 10)
       blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30)), pygame.font.Font('freesansbold.ttf', int(16)))
@@ -248,7 +231,6 @@ class GanttChart(ActivityNetwork):
 class ResourceHistogram(ActivityNetwork):
   #put constraint into self setup init super
 
-  #explain theese in write up gooberino
   def setupclasses(self):
     pass
 
@@ -256,30 +238,23 @@ class ResourceHistogram(ActivityNetwork):
     pass
   
   def draw(self, screen, constraint):
-    #defines the x and y difs
     self.xdif = self.width/max([each[5] for each in self.tree])
     self.ydif = self.height/(max([each[7] for each in self.tree])+self.maxheight) #rebuild this at somepoint to find the highest point of resource usage within the histogram instead of this hacky solution *****
     
-    #loops up to the finishing time of the tree by time intervals
     for i in range(max([each[5] for each in self.tree]) + 1):
-      #defines the set for the active task at each time interval
       set = []
       for each in self.tree:
-        #adds every active task to the set list
         if i > each[4] and i <= (each[4] + each[1]):
           if (each[5] - each[1] - each[4]) == 0:
             set.append([each[0], each[7], each[5] - each[1] - each[4], (255,0,0)])
           else:
             set.append([each[0], each[7], each[5] - each[1] - each[4], (255,255,255)])
-      #sorts set by whether the task is critical or not using lambda function
       set = sorted(set, key = lambda x: x[2])
       height = 0
-      #draws every active task in set
       for each in set:
         pygame.draw.rect(screen, each[3], [self.x + (self.xdif*(i-1)), self.y + (self.height - (self.ydif*height) - self.ydif*each[1]), self.xdif, self.ydif*each[1]], 0)
         blit_text(screen, each[0], (self.x + (self.xdif*(i-1)), self.y + (self.height - (self.ydif*height) - self.ydif*each[1])), pygame.font.Font('freesansbold.ttf'), int(16))
         height += each[1]
-    #draws the constraint line
     pygame.draw.line(screen, (0,255,0), (self.x, self.y + (self.height - self.ydif*constraint - 5)), (self.x + self.width, self.y + (self.height - self.ydif*constraint - 5)), 5)
 
       #make labels, add colour coding maybe?
@@ -290,14 +265,14 @@ class ResourceHistogram(ActivityNetwork):
     points = length//5 + 1
     scale = self.xdif * 5
 
-    #draws each point on the scale.
+
     for i in range(points):
       pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20)), (scale*i + self.x, (self.ydif -10 + self.y)), 10)
       blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30)), pygame.font.Font('freesansbold.ttf', int(16)))
 
 
 class InputBox:
-  def __init__(self, x, y, w, h, text="", interactable=True):
+  def __init__(self, x, y, w, h, text="", interactable=True):#interactable can be safely removed at later date
       self.colourInactive = (255,255,255)
       self.colourActive = (0,255,0)
       self.FONT = pygame.font.Font(None, 32)
@@ -320,15 +295,12 @@ class InputBox:
           # Change the current color of the input box.
           self.color = self.colourActive if self.active else self.colourInactive
       if event.type == pygame.KEYDOWN:
-          #if it is active
           if self.active:
               #if event.key == pygame.K_RETURN:
               #    print(self.text)
               #    self.text = ''
-              #get the key input
               if event.key == pygame.K_BACKSPACE:
                   self.text = self.text[:-1]
-                  #changes the text based on input
               elif self.txt_surface.get_width() + 10 < self.rect.w:
                   self.text += event.unicode.rstrip()
 
@@ -403,9 +375,7 @@ class InputBoxArray:
     self.box_array = []
   
   def AddRow(self, text = None):
-    #makes sure the amonut of rows isnt too large
     if text == None and len(self.box_array) <= 15:
-        #if it is the first row
         if self.box_array == []:
           self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif),  #name
                                  InputBox(self.x + self.xdif, self.y, self.xdif, self.ydif), #duration
@@ -413,13 +383,11 @@ class InputBoxArray:
                                  InputBox(self.x + self.xdif*3, self.y, self.xdif, self.ydif)]) #resource
   
         else:
-        #if it is not the first row
           nu_y = self.box_array[-1][0].getY() + self.ydif
           self.box_array.append([InputBox(self.x, nu_y, self.xdif, self.ydif),  #name
                                  InputBox(self.x + self.xdif, nu_y, self.xdif, self.ydif), #duration
                                  InputBox(self.x + self.xdif*2, nu_y, self.xdif, self.ydif), #predecessors
                                  InputBox(self.x + self.xdif*3, nu_y, self.xdif, self.ydif)]) #resource
-    #if the row already has a values for the fields
     elif len(self.box_array) <= 15:
         if self.box_array == []:
           self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif, text[0]),  #name
@@ -435,7 +403,6 @@ class InputBoxArray:
                                  InputBox(self.x + self.xdif*3, nu_y, self.xdif, self.ydif, text[3])]) #resource
 
   def DelRow(self):
-    #if the box_array isnt empty, delete the last element.
     if self.box_array != []:
       del self.box_array[-1]
   
@@ -444,24 +411,22 @@ class InputBoxArray:
   #fix exceptions
   
   def build_tree(self):
-      #loops through each row in the table
       for row in self.box_array:
-        #runs the get text getter to get the values stored in each column
         name = row[0].getText()
         duration = int(row[1].getText())
         predecessors = row[2].getText().split(",")
         resource = int(row[3].getText())
-        #clears any empty predecessors or any leftover START or END dependancies from CPA
         if predecessors == [''] or predecessors == ['START'] or predecessors == ['END']:
           predecessors = []
-        #adds the contents of the table to the self.tree array in the correct data format for CPA algorithm
         if name != "START" and name != "END":
           self.tree.append([name, duration, predecessors, [], None, None, 0, resource])
-      #returns self.tree
+
       return self.tree
 
   def get_tree(self, tree):
+    #clears the input box array
       self.box_array = []
+    #loops through the input tree and adds rows based on each node
       for node in tree:
         data = [node[0], str(node[1]), ",".join(node[2]), str(node[7])]
         self.AddRow(data)

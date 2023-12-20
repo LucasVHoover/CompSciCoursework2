@@ -37,12 +37,7 @@ MENU = 0
 #MENU 2 - Load Saved Screen
 #MENU 3 - Loaded thingmabob
 
-view = 1
 
-#view 0 - Activity Netowkr
-#view 1 - Gantt Chart
-
-#switch the views between activity network and gantt chart
 
 logged_in = False
 
@@ -128,7 +123,7 @@ def fetchID(username):
   connection.close()
   return output
 
-def Login(): #NEED TO BRING ALL DATABASE FUNCTIONS OUT OF DATABASE.PY AND INTO MAIN BECAUSE DATABASES ARE STUPID
+def Login(): 
     username = inputUsername.getText()
     password = inputPassword.getText()
     print("trying")
@@ -196,6 +191,12 @@ on_screen = []
 constraint = 5
 tree = []
 
+view = 1
+
+#view 0 - Activity Netowkr
+#view 1 - Gantt Chart
+
+#switch the views between activity network and gantt chart
 
 def setup(tree, view):
 #runs the CPA algorithm on the tree and gets the output tree and maxheight
@@ -235,10 +236,6 @@ SavePopup = False
 LoadTree = UIelements.Menu_button(150, 700, "Load Tree", (0,0,0), (255,255,255), None)
 
 inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
-
-#<<<<<<< HEAD
-#inputBoxes.get_tree(example)
-#=======
 inputConstraint = UIelements.InputBox(250, 750, 100, 40)
 
 #inputBoxes.get_tree(example)
@@ -419,10 +416,15 @@ while True:
                     if DelRowButton.change(mouse, False):
                         inputBoxes.DelRow()
                     if SwitchViewButton.change(mouse, False):
+                      #switches the view to the other option
                         view = switchview(view)
+                      #clears the networks on screen
                         on_screen = []
+                      #clears the input box tree attribute
                         inputBoxes.setTree([])
+                      #pulls the tree stored in input boxes using build tree
                         tree = inputBoxes.build_tree()
+                      #re runs setup with the new view
                         setup(tree, view)
                     if SaveAsTree.change(mouse, False):
                         constraint = int(inputConstraint.getText())
