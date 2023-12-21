@@ -35,7 +35,7 @@ MENU = 0
 #MENU 0 - Start Menu
 #MENU 1 - Login Screen
 #MENU 2 - Load Saved Screen
-#MENU 3 - Loaded thingmabob
+#MENU 3 - CPA screen
 
 
 
@@ -49,6 +49,7 @@ SignInMenu = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+100, "
 Help = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+150, "Help", (0,0,0), (255,255,255), None)
 
 logo = pygame.image.load("coursework logo.png")
+logo = pygame.transform.scale(logo, (600,300))
 logomask = pygame.mask.from_surface(logo)
 
 ShowLogin = UIelements.GreenRedButton(100, 100, "Logged In", (255,255,255), (255,0,0), None, (0,255,0)) #Make this a change colour status 
@@ -289,27 +290,40 @@ while True:
     clock.tick(FPS)
     WIN.fill((10,10,10))
     mouse = pygame.mouse.get_pos()
+  
     if MENU == 0:
-        WIN.blit(logo, (WIN.get_width()/2-565, WIN.get_height()/2-575))
+      #draws all objects
+        WIN.blit(logo, (WIN.get_width()/2 - 265, WIN.get_height()/2- 250))
         New_Tree.draw(WIN)
         Load_Tree.draw(WIN)
         SignInMenu.draw(WIN)
         Help.draw(WIN)
         ShowLogin.draw(WIN)
-      
+      #gets pygame events
         for event in pygame.event.get():
+          #detects if the window is being closed and quits
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+          #if there has been a mouse click
             if event.type == pygame.MOUSEBUTTONDOWN:
+              #if new tree is clicked
                 if New_Tree.change(mouse, False):
+                  #check if logged in.
                     if logged_in:
+                      #go to the CPA screen
                         MENU = 3
-                if SignInMenu.change(mouse, False):
+              #if sign in clicked
+                elif SignInMenu.change(mouse, False):
+                  #go to sign in screen
                     MENU = 1
-                if Load_Tree.change(mouse, False):
+              #if load tree clicked
+                elif Load_Tree.change(mouse, False):
+                  #if logged in
                     if logged_in:
+                      #go to the load tree screen
                         MENU = 2
+                      #get saved trees
                         SavedBoxes.get_tree(accountID)
 
       
