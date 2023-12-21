@@ -17,7 +17,7 @@ def initialiseTables():
     CREATE TABLE IF NOT EXISTS tree(
                 TreeID INTEGER PRIMARY KEY,
                 AccountID INT,
-                name varchar(20),
+                name varchar(20) UNIQUE,
                 network varchar(1000),
                 resourceConstraint INT
                 )
@@ -30,7 +30,7 @@ def initialiseTables():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS accounts(
                    accountID INTEGER PRIMARY KEY,
-                   username varchar(20)
+                   username varchar(20) UNIQUE
     )
     ''')
     connection.commit()

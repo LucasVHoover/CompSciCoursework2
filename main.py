@@ -77,22 +77,28 @@ def btecArgon(plaintext):
   hash = plaintext
   return hash
 
+#this shoudld be key.encode() with argon activated
+
+
 def insertHashword(key, value):
-    print(value)
-    index = btecArgon(key)#this shoudld be key.encode() with argon activated
+    #hashes the input
+    index = btecArgon(key)
+    #creates the input tuple
     input = (index, int(value[0][0]))
-    print(input)
+    #connects to database
     connection = sqlite3.connect("activity-tables.db")
     cursor = connection.cursor()
+    #inserts values
     cursor.execute(
         '''INSERT INTO passwords VALUES(?,?)''', input
     )
     connection.commit()
     cursor.close()
     connection.close()
+    #closes the connection
  
 def checkmatch(key, value):
-    index = btecArgon(key)#this should be key.encode() with argon activiated
+    index = btecArgon(key)
     input = (index, int(value[0][0]))
     connection = sqlite3.connect("activity-tables.db")
     cursor = connection.cursor()
@@ -125,17 +131,18 @@ def fetchID(username):
   return output
 
 def Login(): 
+    #gets the username and password from the input boxes
     username = inputUsername.getText()
     password = inputPassword.getText()
-    print("trying")
 
     try:
-
+        #gets the account id of the username
         tempID = fetchID(username)
-
+        #checks if the password is correct
         if checkmatch(password, tempID):
+            #if it is correct set account id
             accountID = tempID
-            #logged_in = True
+            #go back to start menu
             MENU = 0
             ShowLogin.change(True)
 
@@ -147,38 +154,41 @@ def Login():
 
 
     except:
-        print("error")
+        print("login error")
         return 1, "", True
         
 
   
-def Sign_Up(): #SIGN UP NEEDS FIXING DOES NOT WORK AS NOW
-    username = str(inputUsername.getText())
-    password = str(inputPassword.getText())
-    print(username)
-
+def Sign_Up(): 
     try:
+        #gets the username and password from the input boxes
+        username = str(inputUsername.getText())
+        password = str(inputPassword.getText())
+
+        #connects to the database
         connection = sqlite3.connect("activity-tables.db")
         cursor = connection.cursor()
+        #inserts a new record with the input username
         cursor.execute('''
-            INSERT IGNORE INTO accounts(username) VALUES(?)
+            INSERT OR IGNORE INTO accounts(username) VALUES(?)
         ''', (username,))
-        
+        #commits transaction
         connection.commit()
         cursor.close()
         connection.close()
 
+        #gets the ID of this new record
         accountID = fetchID(username)
-        print(accountID)
 
+        #inserts the password of this new account into the hash table
         insertHashword(password, accountID)
-            
+        
+        #logs in
         MENU , accountID, logged_in = Login()
 
         return MENU, accountID, logged_in
-
     except:
-        print("error")
+        print("sign in error")
         return 1, "", True
 
 #MENU 2 ----------------------------------------------------------------------------------------------------------------------------------------
@@ -248,7 +258,7 @@ def saveTree(inputs, constraint, name):
         cursor = connection.cursor()
         input = (accountID[0][0], name, pickle.dumps(inputs), constraint)
         cursor.execute(
-            '''INSERT INTO tree(AccountID, name, network, resourceConstraint) VALUES(?,?,?,?)''', input
+            '''INSERT OR IGNORE INTO tree(AccountID, name, network, resourceConstraint) VALUES(?,?,?,?)''', input
         )
         print("Save Complete")
         connection.commit()
