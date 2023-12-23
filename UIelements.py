@@ -448,25 +448,26 @@ class InputBoxArray:
 
 class SaveBoxArray(InputBoxArray):
     def AddRow(self, text):
+      #if the array is not full
       if len(self.box_array) <= 15:
+        #if it is the first row
         if self.box_array == []:
-          self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif, text[0], False),  #name
-                                 InputBox(self.x + self.xdif, self.y, self.xdif, self.ydif, text[1], True),
-                                 Menu_button(self.x + self.xdif*2 + 50, self.y + 17, "Load", (0,0,0), (255,255,255), None)]) #NEED TO MOVE THESE BOXES
-                                 #InputBox(self.x + self.xdif*2, self.y, self.xdif, self.ydif, text[2], False), #
-                                 #InputBox(self.x + self.xdif*3, self.y, self.xdif, self.ydif, text[3], False)]) #
+          self.box_array.append([InputBox(self.x, self.y, self.xdif, self.ydif, text[0], False),  #ID
+                                 InputBox(self.x + self.xdif, self.y, self.xdif, self.ydif, text[1], True), #Name
+                                 Menu_button(self.x + self.xdif*2 + 50, self.y + 17, "Load", (0,0,0), (255,255,255), None)]) #Button
+
     
         else:
           nu_y = self.box_array[-1][0].getY() + self.ydif
-          self.box_array.append([InputBox(self.x, nu_y, self.xdif, self.ydif, text[0], False),  #name
-                                 InputBox(self.x + self.xdif, nu_y, self.xdif, self.ydif, text[1], True),
-                                 Menu_button(self.x + self.xdif*2 + 50, nu_y + 17, "Load", (0,0,0), (255,255,255), None)]) #NEED TO MOVE THESE BOXES
-                                 #InputBox(self.x + self.xdif*2, nu_y, self.xdif, self.ydif, text[2], False), #
-                                 #InputBox(self.x + self.xdif*3, nu_y, self.xdif, self.ydif, text[3], False)]) #
+          self.box_array.append([InputBox(self.x, nu_y, self.xdif, self.ydif, text[0], False),  #ID
+                                 InputBox(self.x + self.xdif, nu_y, self.xdif, self.ydif, text[1], True), #name
+                                 Menu_button(self.x + self.xdif*2 + 50, nu_y + 17, "Load", (0,0,0), (255,255,255), None)]) #Button
           
     def get_tree(self, accountID):
+        #connects to the database
         connection = sqlite3.connect("activity-tables.db")
         cursor = connection.cursor()
+        #fetches the trees related to the input accountID
         output = cursor.execute('''
           SELECT name, TreeID FROM tree WHERE accountID = ?
         ''', (accountID[0][0],)).fetchall()
@@ -475,8 +476,10 @@ class SaveBoxArray(InputBoxArray):
         cursor.close()
         connection.close()
 
+        #clears the self.box_array
         self.box_array = []
         for node in output:
+          #adds rows with the data
           data = [str(node[1]), node[0]]
           self.tree.append(data)
           self.AddRow(data)
@@ -484,11 +487,14 @@ class SaveBoxArray(InputBoxArray):
 
     def save_trees(self):
         self.tree = []
+        #creates the data
         for row in self.box_array:
             data = [row[0].getText(), row[1].getText()]
             self.tree.append(data)
+        #connects to the database
         connection = sqlite3.connect("activity-tables.db")
         cursor = connection.cursor()
+        #for every element in the tree update the associated record in the tree table
         for each in self.tree:
           input = [each[1],int(each[0])]
           cursor.execute('''
@@ -499,12 +505,18 @@ class SaveBoxArray(InputBoxArray):
         connection.close()
 
     def events(self, event, mouse):
+      #loops through the box_array
       for box in self.box_array:
+        #runs handle event method for the input boxes
         for each in box[:-1]:
           each.handle_event(event)
+        #if mouse click detected
         if event.type == pygame.MOUSEBUTTONDOWN:
+          #if the load tree button is clicked
           if box[2].change(mouse, False):
+            #gets the TreeID from the input box
             TreeID = box[0].getText()
+            #loads the treeS
             connection = sqlite3.connect("activity-tables.db")
             cursor = connection.cursor()
             output = cursor.execute('''

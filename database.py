@@ -24,8 +24,8 @@ def initialiseTables():
     ''')
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS passwords(
-                password varchar(50) PRIMARY KEY,
-                accountID INT)
+                password varchar(50),
+                accountID INTEGER PRIMARY KEY)
     ''')
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS accounts(
