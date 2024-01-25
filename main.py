@@ -5,6 +5,9 @@ import UIelements
 import database
 import pickle
 import logic
+import argon2
+from argon2 import PasswordHasher
+ph = PasswordHasher()
 
 pygame.init()
 WIN = pygame.display.set_mode((1500,800))
@@ -85,7 +88,8 @@ LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+200, 
 Sign_UpButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+250, "Sign Up", (0,0,0), (255,255,255), None)
 
 def btecArgon(plaintext):
-  hash = plaintext
+  hash = ph.hash(plaintext)
+  print(hash)
   return hash
 
 #this shoudld be key.encode() with argon activated
@@ -145,7 +149,7 @@ def fetchID(username):
   return output
 
 def Login(): 
-        #gets the username and password from the input boxes
+    #gets the username and password from the input boxes
         username = inputUsername.getText()
         password = inputPassword.getText()
         print("trying")
