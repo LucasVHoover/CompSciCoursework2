@@ -140,15 +140,15 @@ class ActivityNetwork:
       Nx = each[0] + self.x
       Ny = each[1] + self.y + 10
       #creates the text that will be in each nodes box
-      Ntext = each[2][0] + str(each[2][4]) + str(each[2][1]) + str(each[2][5]) # needs work
+      Ntext = f"{each[2][0]}: {str(each[2][4])} | {str(each[2][1])} | {str(each[2][5])}"
       #draws the box for the node
-      pygame.draw.rect(screen, (255,255,255), [Nx - 5, Ny - 5, self.Nwidth + 10, self.Nheight + 10])
+      pygame.draw.rect(screen, (255,255,255), [Nx - 5, Ny - 5, self.Nwidth + 50, self.Nheight + 10])
       if (each[2][1] + each[2][4]) != each[2][5]:
-        pygame.draw.rect(screen, self.Ncolour, [Nx, Ny, self.Nwidth, self.Nheight])
+        pygame.draw.rect(screen, self.Ncolour, [Nx, Ny, self.Nwidth + 40, self.Nheight])
       else:
-        pygame.draw.rect(screen, self.Ncritcolour, [Nx, Ny, self.Nwidth, self.Nheight])
+        pygame.draw.rect(screen, self.Ncritcolour, [Nx, Ny, self.Nwidth + 40, self.Nheight])
       #blits the text using the blit_text function
-      blit_text(screen, Ntext, (Nx + 10 ,Ny + 10), pygame.font.Font('freesansbold.ttf', int(16)))
+      blit_text(screen, Ntext, (Nx + 1 ,Ny + 1), pygame.font.Font('freesansbold.ttf', int(16)))
 
   def draw_arrows(self, screen):
     #loops through each node
@@ -194,13 +194,13 @@ class GanttChart(ActivityNetwork):
 
       self.Nwidth = each[2][1] * self.xdif
       
-      Ntext = each[2][0] + str(each[2][4]) + str(each[2][1]) + str(each[2][5]) # needs work
+      Ntext = f"{each[2][0]}: {str(each[2][4])} | {str(each[2][1])} | {str(each[2][5])}" 
       pygame.draw.rect(screen, (255,255,255), [Nx, Ny - 2.5, self.Nwidth + 2.5, self.Nheight + 2.5])
       if (each[2][1] + each[2][4]) != each[2][5]:
         pygame.draw.rect(screen, self.Ncolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
       else:
         pygame.draw.rect(screen, self.Ncritcolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
-      blit_text(screen, Ntext, (Nx + 2.5 ,Ny + 2.5), pygame.font.Font('freesansbold.ttf', int(16)))
+      blit_text(screen, Ntext, (Nx + 2.5 ,Ny + 1), pygame.font.Font('freesansbold.ttf', int(16)))
 
   def draw_arrows(self, screen):
     for examinednode in self.nodes:

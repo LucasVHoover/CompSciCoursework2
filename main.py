@@ -24,6 +24,11 @@ output = cursor.execute(
 ).fetchall()
     #pulls the ID
 print(output)
+output = cursor.execute(
+    '''SELECT * FROM passwords'''
+).fetchall()
+    #pulls the ID
+print(output)
 connection.commit()
 cursor.close()
 connection.close()
@@ -88,7 +93,8 @@ LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+200, 
 Sign_UpButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+250, "Sign Up", (0,0,0), (255,255,255), None)
 
 def btecArgon(plaintext):
-  hash = ph.hash(plaintext)
+  #hash = ph.hash(plaintext)
+  hash = plaintext
   print(hash)
   return hash
 
@@ -229,19 +235,22 @@ view = 1
 
 def setup(tree, view):
 #runs the CPA algorithm on the tree and gets the output tree and maxheight
-  tree, maxheight = logic.CPA(tree)
+  try:
+    tree, maxheight = logic.CPA(tree)
 
-#uses the on_screen list to contain the active objects 
-  if view == 0:
-    on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
-    on_screen.append(UIelements.ActivityNetwork(tree, 800, 400, 550, 0, 50, 50, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
-  elif view == 1:
-    on_screen.append(UIelements.GanttChart(tree, 800, 400, 550, 0, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
-    on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+  #uses the on_screen list to contain the active objects 
+    if view == 0:
+      on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+      on_screen.append(UIelements.ActivityNetwork(tree, 800, 400, 550, 0, 50, 50, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+    elif view == 1:
+      on_screen.append(UIelements.GanttChart(tree, 800, 400, 550, 0, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
+      on_screen.append(UIelements.ResourceHistogram(tree, 800, 400, 550, 350, 50, 25, (50,50,50), (255,0,0), (0,255,0), 5, maxheight))
 
 #runs setupclasses method for the objects in on_screen
-  for each in on_screen:
-    each.setupclasses()
+    for each in on_screen:
+      each.setupclasses()
+  except:
+    pass
 
 def switchview(view):
   if view == 0:
@@ -266,6 +275,8 @@ LoadTree = UIelements.Menu_button(150, 700, "Load Tree", (0,0,0), (255,255,255),
 
 inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
 inputConstraint = UIelements.InputBox(250, 750, 100, 40)
+
+ExampleFormat = UIelements.Menu_button(1350, 100, "EST | Duration | LFT", (0,0,0), (255,255,255), None)
 
 #inputBoxes.get_tree(example)
 #>>>>>>> dd4c175c081fe8de7156549e7f7e72780435e2d7
@@ -458,6 +469,7 @@ while True:
             SwitchViewButton.draw(WIN)
             SaveTree.draw(WIN)
             inputConstraint.draw(WIN)
+            ExampleFormat.draw(WIN)
             for each in on_screen:
                 each.draw_arrows(WIN)
                 each.draw(WIN, constraint)
@@ -486,10 +498,13 @@ while True:
                         on_screen = []
                       #clears the input box tree attribute
                         inputBoxes.setTree([])
-                      #pulls the tree stored in input boxes using build tree
-                        tree = inputBoxes.build_tree()
-                      #re runs setup with the new view
-                        setup(tree, view)
+                        try:
+                        #pulls the tree stored in input boxes using build tree
+                          tree = inputBoxes.build_tree()
+                        #re runs setup with the new view
+                          setup(tree, view)
+                        except:
+                          pass
                     if SaveAsTree.change(mouse, False):
                         constraint = int(inputConstraint.getText())
                         on_screen = []
@@ -508,8 +523,11 @@ while True:
                           constraint = 0
                         on_screen = []
                         inputBoxes.setTree([]) 
-                        tree = inputBoxes.build_tree()
-                        setup(tree,view)
+                        try:
+                            tree = inputBoxes.build_tree()
+                            setup(tree,view)
+                        except:
+                            pass
                     if SaveTree.change(mouse, False):
                         constraint = int(inputConstraint.getText())
                         on_screen = []
