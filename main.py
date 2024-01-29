@@ -156,10 +156,10 @@ def fetchID(username):
 
 def Login(): 
     #gets the username and password from the input boxes
-        username = inputUsername.getText()
-        password = inputPassword.getText()
-        print("trying")
-    #try:
+    username = inputUsername.getText()
+    password = inputPassword.getText()
+    print("trying")
+    try:
         #gets the account id of the username
         tempID = fetchID(username)
         #checks if the password is correct
@@ -177,17 +177,20 @@ def Login():
             return 1, "", True
 
 
-    #except:
-        #print("login error")
-        #return 1, "", True
+    except:
+        print("login error")
+        return 1, "", True
         
 
   
 def Sign_Up(): 
-    #try:
+    try:
         #gets the username and password from the input boxes
         username = str(inputUsername.getText())
         password = str(inputPassword.getText())
+        if username == "" or password == "":
+            print("sign in error")
+            return 1, "", True
 
         #connects to the database
         connection = sqlite3.connect("activity-tables.db")
@@ -211,9 +214,9 @@ def Sign_Up():
         MENU , accountID, logged_in = Login()
 
         return MENU, accountID, logged_in
-    #except:
-        #print("sign in error")
-        #return 1, "", True
+    except:
+        print("sign in error")
+        return 1, "", True
 
 #MENU 2 ----------------------------------------------------------------------------------------------------------------------------------------
   
@@ -362,6 +365,8 @@ while True:
                   #check if logged in.
                     if logged_in:
                       #go to the CPA screen
+                        on_screen = []
+                        inputBoxes.setTree([]) 
                         MENU = 3
               #if sign in clicked
                 elif SignInMenu.change(mouse, False):
