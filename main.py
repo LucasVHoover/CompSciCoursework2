@@ -338,6 +338,7 @@ def loadTree(name):
 
 #MENU 4 --------------------------------------------------------------------------------------------------------------------------------
 
+#USE BLIT TEXT INSTEAD BOZO
 MenuTextBox = UIelements.Menu_button(100, 100, "Welcome To Lucas's CPA, Gantt Chart and Resource Histogram Tool\n\nTo create or load projects you must first sign in.\nTo sign in you must click on log in/sign up\nthen you should input a username and password and press sign up.\nIf you want to log into an existing account acces the same menu and click log in instead\nTo start a new project click new project and to load a saved project select load project.", (0,0,0), (255,255,255), None)
 
 #MAIN LOOP -----------------------------------------------------------------------------------------------------------------------------
