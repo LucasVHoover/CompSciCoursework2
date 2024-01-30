@@ -276,8 +276,8 @@ SavePopup = False
 
 LoadTree = UIelements.Menu_button(150, 700, "Load Tree", (0,0,0), (255,255,255), None)
 
-inputBoxes = UIelements.InputBoxArray(0, 0, 500, 500, [])
-inputConstraint = UIelements.InputBox(250, 750, 100, 40)
+inputBoxes = UIelements.InputBoxArray(0, 34, 500, 500, [])
+inputConstraint = UIelements.InputBox(375, 730, 100, 40)
 
 ExampleFormat = UIelements.Menu_button(1350, 100, "EST | Duration | LFT", (0,0,0), (255,255,255), None)
 
@@ -338,8 +338,11 @@ def loadTree(name):
 
 #MENU 4 --------------------------------------------------------------------------------------------------------------------------------
 
-#USE BLIT TEXT INSTEAD BOZO
-MenuTextBox = UIelements.Menu_button(100, 100, "Welcome To Lucas's CPA, Gantt Chart and Resource Histogram Tool\n\nTo create or load projects you must first sign in.\nTo sign in you must click on log in/sign up\nthen you should input a username and password and press sign up.\nIf you want to log into an existing account acces the same menu and click log in instead\nTo start a new project click new project and to load a saved project select load project.", (0,0,0), (255,255,255), None)
+"Welcome To Lucas's CPA, Gantt Chart and Resource Histogram Tool\n\nTo create or load projects you must first sign in.\nTo sign in you must click on log in/sign up\nthen you should input a username and password and press sign up.\nIf you want to log into an existing account acces the same menu and click log in instead\nTo start a new project click new project and to load a saved project select load project.",
+
+helpImage = pygame.image.load("Help-Image.PNG")
+helpImage = pygame.transform.scale(helpImage, (900,500))
+helpmask = pygame.mask.from_surface(helpImage)
 
 #MAIN LOOP -----------------------------------------------------------------------------------------------------------------------------
 
@@ -453,10 +456,10 @@ while True:
         
 
 
-    elif MENU == 3:
-        
+    elif MENU == 3:        
         if SavePopup:
             SaveTreeInput.draw(WIN)
+            UIelements.blit_text(WIN, "Input the name of the project you wish to save and press enter:", (172,250), pygame.font.Font('freesansbold.ttf', int(32)))
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -470,6 +473,11 @@ while True:
                     SavePopup = False
         
         else:
+            UIelements.blit_text(WIN, "Task Name", (0,0), pygame.font.Font('freesansbold.ttf', int(16)))
+            UIelements.blit_text(WIN, "Duration", (125,0), pygame.font.Font('freesansbold.ttf', int(16)))
+            UIelements.blit_text(WIN, "Predecessors", (250,0), pygame.font.Font('freesansbold.ttf', int(16)))
+            UIelements.blit_text(WIN, "Resources", (375,0), pygame.font.Font('freesansbold.ttf', int(16)))
+            UIelements.blit_text(WIN, "Resource Constraint:", (200,740), pygame.font.Font('freesansbold.ttf', int(16)))
             ReturnMain.draw(WIN)
             inputBoxes.draw(WIN)
             AddRowButton.draw(WIN)
@@ -549,7 +557,8 @@ while True:
                         MENU = 0
                         on_screen = []
     elif MENU == 4:
-         MenuTextBox.draw(WIN)
+         WIN.blit(helpImage, (100, 250))
+         UIelements.blit_text(WIN, "Welcome To Lucas's CPA, Gantt Chart and Resource Histogram Tool\n\nTo create or load projects you must first sign in.\nTo sign in you must click on log in/sign up\nthen you should input a username and password and press sign up.\nIf you want to log into an existing account acces the same menu and click log in instead\nTo start a new project click new project and to load a saved project select load project.", (100,100), pygame.font.Font('freesansbold.ttf', int(16)))
          ReturnMain.draw(WIN)
          for event in pygame.event.get():
                 if event.type == QUIT:
