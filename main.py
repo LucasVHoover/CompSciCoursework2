@@ -283,8 +283,9 @@ ExampleFormat = UIelements.Menu_button(1350, 100, "EST | Duration | LFT", (0,0,0
 
 #inputBoxes.get_tree(example)
 
-def saveTree(inputs, constraint, name):
+def saveTree(inputs, name):
     try:
+        constraint = int(inputConstraint.getText())
         #connects to database
         connection = sqlite3.connect("activity-tables.db")
         cursor = connection.cursor()
@@ -303,20 +304,25 @@ def saveTree(inputs, constraint, name):
         print("error")
         return False
         
-def updateTree(inputs, constraint, TreeID):
-    #connects to database
-    connection = sqlite3.connect("activity-tables.db")
-    cursor = connection.cursor()
-    #setsup input
-    input = (pickle.dumps(inputs), constraint, TreeID)
-    cursor.execute(
-        '''UPDATE tree SET network = ?, resourceConstraint = ? WHERE TreeID = ?''', input
-    )
-    print("Save Complete")
-    #commits change
-    connection.commit()
-    cursor.close()
-    connection.close()
+def updateTree(inputs, TreeID):
+    try:
+      constraint = int(inputConstraint.getText())
+      #connects to database
+      connection = sqlite3.connect("activity-tables.db")
+      cursor = connection.cursor()
+      #setsup input
+      input = (pickle.dumps(inputs), constraint, TreeID)
+      cursor.execute(
+          '''UPDATE tree SET network = ?, resourceConstraint = ? WHERE TreeID = ?''', input
+      )
+      print("Save Complete")
+      #commits change
+      connection.commit()
+      cursor.close()
+      connection.close()
+    except:
+        print("Save error")
+        pass
 
 def loadTree(name):
   #connects to the database
@@ -464,7 +470,7 @@ while True:
                     sys.exit()
                 saveName = SaveTreeInput.handle_event(event)
             if saveName != "":
-                if saveTree(tree, constraint, saveName):
+                if saveTree(tree, saveName):
                     inputBoxes.setTree([])
                     tree = inputBoxes.build_tree()
                     SaveTreeInput.flipActive()
@@ -523,7 +529,6 @@ while True:
                         except:
                           pass
                     if SaveAsTree.change(mouse, False):
-                        constraint = int(inputConstraint.getText())
                         on_screen = []
                         inputBoxes.setTree([]) 
                         tree = inputBoxes.build_tree()
@@ -547,11 +552,10 @@ while True:
                         except:
                             pass
                     if SaveTree.change(mouse, False):
-                        constraint = int(inputConstraint.getText())
                         on_screen = []
-                        inputBoxes.setTree([]) #POTENTIAL ISSUE POINT??
-                        tree = inputBoxes.build_tree() #need to save tree ID DONE?
-                        updateTree(tree, constraint, TreeID)
+                        inputBoxes.setTree([])
+                        tree = inputBoxes.build_tree() 
+                        updateTree(tree, TreeID)
                     if ReturnMain.change(mouse, False):
                         MENU = 0
                         on_screen = []
