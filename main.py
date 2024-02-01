@@ -338,8 +338,6 @@ def loadTree(name):
 
 #MENU 4 --------------------------------------------------------------------------------------------------------------------------------
 
-"Welcome To Lucas's CPA, Gantt Chart and Resource Histogram Tool\n\nTo create or load projects you must first sign in.\nTo sign in you must click on log in/sign up\nthen you should input a username and password and press sign up.\nIf you want to log into an existing account acces the same menu and click log in instead\nTo start a new project click new project and to load a saved project select load project.",
-
 helpImage = pygame.image.load("Help-Image.PNG")
 helpImage = pygame.transform.scale(helpImage, (900,500))
 helpmask = pygame.mask.from_surface(helpImage)
@@ -536,6 +534,7 @@ while True:
                         MENU = 2
                         on_screen = []
                     if BuildTree.change(mouse, False):
+                        #catches erroneous inputs
                         try:
                           constraint = int(inputConstraint.getText())
                         except:
@@ -557,13 +556,16 @@ while True:
                         MENU = 0
                         on_screen = []
     elif MENU == 4:
+         #draw image and text
          WIN.blit(helpImage, (100, 250))
          UIelements.blit_text(WIN, "Welcome To Lucas's CPA, Gantt Chart and Resource Histogram Tool\n\nTo create or load projects you must first sign in.\nTo sign in you must click on log in/sign up\nthen you should input a username and password and press sign up.\nIf you want to log into an existing account acces the same menu and click log in instead\nTo start a new project click new project and to load a saved project select load project.", (100,100), pygame.font.Font('freesansbold.ttf', int(16)))
+         #draw return button
          ReturnMain.draw(WIN)
          for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
                     sys.exit()
+                #detect return input
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if ReturnMain.change(mouse, False):
                         MENU = 0
