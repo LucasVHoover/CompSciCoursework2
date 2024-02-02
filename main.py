@@ -5,9 +5,9 @@ import UIelements
 import database
 import pickle
 import logic
-import argon2
-from argon2 import PasswordHasher
-ph = PasswordHasher()
+#import argon2
+#from argon2 import PasswordHasher
+#ph = PasswordHasher()
 
 pygame.init()
 WIN = pygame.display.set_mode((1500,800))

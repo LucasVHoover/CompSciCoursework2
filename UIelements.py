@@ -194,7 +194,7 @@ class GanttChart(ActivityNetwork):
 
       self.Nwidth = each[2][1] * self.xdif
       
-      Ntext = f"{each[2][0]}: {str(each[2][4])} | {str(each[2][1])} | {str(each[2][5])}" 
+      Ntext = f"{each[2][0]}: {str(each[2][1])}" 
       pygame.draw.rect(screen, (255,255,255), [Nx, Ny - 2.5, self.Nwidth + 2.5, self.Nheight + 2.5])
       if (each[2][1] + each[2][4]) != each[2][5]:
         pygame.draw.rect(screen, self.Ncolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
@@ -223,8 +223,8 @@ class GanttChart(ActivityNetwork):
 
     
     for i in range(points + 1):
-      pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20)), (scale*i + self.x, (self.ydif -10 + self.y)), 10)
-      blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30)), pygame.font.Font('freesansbold.ttf', int(16)))
+      pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20 + self.height)), (scale*i + self.x, (self.ydif -10 + self.y + self.height)), 10)
+      blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30 + self.height)), pygame.font.Font('freesansbold.ttf', int(16)))
         
   #should make scale lines for x and y axis method
 
@@ -267,8 +267,8 @@ class ResourceHistogram(ActivityNetwork):
 
 
     for i in range(points):
-      pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20)), (scale*i + self.x, (self.ydif -10 + self.y)), 10)
-      blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30)), pygame.font.Font('freesansbold.ttf', int(16)))
+      pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20 + self.height)), (scale*i + self.x, (self.ydif -10 + self.y + self.height)), 10)
+      blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30 + self.height)), pygame.font.Font('freesansbold.ttf', int(16)))
 
 
 class InputBox:
