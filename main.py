@@ -5,9 +5,9 @@ import UIelements
 import database
 import pickle
 import logic
-#import argon2
-#from argon2 import PasswordHasher
-#ph = PasswordHasher()
+import argon2
+from argon2 import PasswordHasher
+ph = PasswordHasher()
 
 pygame.init()
 WIN = pygame.display.set_mode((1500,800))
@@ -92,18 +92,18 @@ LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+200, 
 
 Sign_UpButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+250, "Sign Up", (0,0,0), (255,255,255), None)
 
-def btecArgon(plaintext):
-  #hash = ph.hash(plaintext)
-  hash = plaintext
-  print(hash)
+#hashes a password
+def hashArgon(plaintext):
+  hash = ph.hash(plaintext)
   return hash
 
-#this shoudld be key.encode() with argon activated
-
+#checks if a password and hash match
+def verifyArgon(hash, plaintext):
+    return ph.verify(hash,plaintext)
 
 def insertHashword(key, value):
     #hashes the input
-    index = btecArgon(key)
+    index = hashArgon(key)
     #creates the input tuple
     input = (index, int(value[0][0]))
     #connects to database
@@ -118,27 +118,24 @@ def insertHashword(key, value):
     connection.close()
     #closes the connection
  
-def checkmatch(key, value):
-    #hashes password
-    index = btecArgon(key)
-    input = (index, int(value[0][0]))
-    #connects to database
+def checkmatch(password, accountID):
     connection = sqlite3.connect("activity-tables.db")
     cursor = connection.cursor()
-    output = cursor.execute(
-        '''SELECT accountID FROM passwords WHERE password = ? AND accountID = ?''', input
+    hash = cursor.execute(
+        '''SELECT password FROM passwords WHERE accountID = ?''', (accountID[0][0],)
     ).fetchall()
-    #pulls the ID
-
+    #pulls the hashed password
     connection.commit()
     cursor.close()
     connection.close()
   
     #if a successful pull return true
-    if output != []:
-        return True
-    else:
+    try:
+        #verifys argon
+        return verifyArgon(hash[0][0], password)
+    except:
         return False
+
 
 def fetchID(username):
   #connects to the database
@@ -176,7 +173,7 @@ def Login():
         else:
             return 1, "", True
 
-
+    #catches any login error
     except:
         print("login error")
         return 1, "", True
