@@ -1,16 +1,13 @@
 #DATA FORMAT ["name (input by user)", "duration  (input by user)", "immediate Predecessors (input by user)",  "immediate successors", EST, LFT, Height]
 #tree = [['A',7, [], [], None, None, 0],
-        #['B', 6, [], [], None, None, 0],
-        #['C',  15, [],[], None, None,0],
-        #['D',  9, ['A', 'B'],[], None, None,0],
-        #['E',  8, ['D'],[], None, None,0],
-        #['F', 6, ['C', 'D'],[], None, None, 0],
-        #['G',  7, ['C'],[], None, None,0],
-        #['H',  14, ['E'],[], None, None,0],
-       # ['I',  17, ['F', 'G'],[], None, None,0],
-       # ['J',  9, ['H','I'],[], None, None,0],
-       # ['K',  8, ['I'],[], None, None,0],
-       # ['L',  12, ['J', 'K'],[], None, None,0]]
+#        ['B', 6, [], [], None, None, 0],
+#        ['C',  15, ['B'],[], None, None,0],
+#        ['D',  9, ['B'],[], None, None,0],
+#        ['E',  8, ['C'],[], None, None,0],
+#        ['F', 6, ['A', 'E'],[], None, None, 0],
+#        ['G',  7, ['F'],[], None, None,0],
+#        ['H',  14, ['G','D'],[], None, None,0]]
+
 
 #add total predecessors value
 
@@ -145,10 +142,14 @@ def CPA(tree):
   tree = forwardPass(tree, 2, maxheight)
   tree = LFT_EndNode(tree, maxheight)
   tree = backwardPass(tree, maxheight-1)
-  #tree = StripStartEnd(tree)
+  tree = StripStartEnd(tree)
   return tree, maxheight
 
 #THIS NEEDS DOING
 def VerifyNoError(tree):
     pass
 
+#output = CPA(tree)
+
+#for each in output:
+#    print(each)

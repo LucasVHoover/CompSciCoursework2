@@ -283,9 +283,8 @@ ExampleFormat = UIelements.Menu_button(1350, 100, "EST | Duration | LFT", (0,0,0
 
 #inputBoxes.get_tree(example)
 
-def saveTree(inputs, name):
+def saveTree(inputs, name, constraint):
     try:
-        constraint = int(inputConstraint.getText())
         #connects to database
         connection = sqlite3.connect("activity-tables.db")
         cursor = connection.cursor()
@@ -304,9 +303,8 @@ def saveTree(inputs, name):
         print("error")
         return False
         
-def updateTree(inputs, TreeID):
+def updateTree(inputs, TreeID, constraint):
     try:
-      constraint = int(inputConstraint.getText())
       #connects to database
       connection = sqlite3.connect("activity-tables.db")
       cursor = connection.cursor()
@@ -470,9 +468,12 @@ while True:
                     sys.exit()
                 saveName = SaveTreeInput.handle_event(event)
             if saveName != "":
-                if saveTree(tree, saveName):
+                if saveTree(tree, saveName, constraint):
                     inputBoxes.setTree([])
                     tree = inputBoxes.build_tree()
+                    SaveTreeInput.flipActive()
+                    SavePopup = False
+                else:
                     SaveTreeInput.flipActive()
                     SavePopup = False
         
@@ -529,12 +530,18 @@ while True:
                         except:
                           pass
                     if SaveAsTree.change(mouse, False):
+                        #catches any invalid inputs for constraint
+                        try:
+                          constraint = int(inputConstraint.getText())
+                        except:
+                          constraint = 0
                         on_screen = []
                         inputBoxes.setTree([]) 
                         tree = inputBoxes.build_tree()
                         SaveTreeInput.flipActive()
                         SavePopup = True
                         saveName = ""
+
                     if LoadTree.change(mouse, False):
                         MENU = 2
                         on_screen = []
@@ -546,16 +553,24 @@ while True:
                           constraint = 0
                         on_screen = []
                         inputBoxes.setTree([]) 
+                        #prevents total durations to be too large for the algorithm
                         try:
-                            tree = inputBoxes.build_tree()
+                          tree = inputBoxes.build_tree()
+                          if sum([each[1] for each in tree]) > 1000:
+                            print("too big duration error")
+                          else:
                             setup(tree,view)
                         except:
                             pass
                     if SaveTree.change(mouse, False):
+                        try:
+                          constraint = int(inputConstraint.getText())
+                        except:
+                          constraint = 0
                         on_screen = []
                         inputBoxes.setTree([])
                         tree = inputBoxes.build_tree() 
-                        updateTree(tree, TreeID)
+                        updateTree(tree, TreeID, constraint)
                     if ReturnMain.change(mouse, False):
                         MENU = 0
                         on_screen = []

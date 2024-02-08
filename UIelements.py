@@ -187,7 +187,7 @@ class GanttChart(ActivityNetwork):
 
     self.Nheight = self.height/(len(self.nodes)*2)
 
-  def draw(self, screen, constraint): # some kind of autoheight and width for text size would be very helpful
+  def draw(self, screen, constraint):
     for each in self.nodes:
       Nx = each[0] + self.x
       Ny = each[1] + self.y
@@ -413,9 +413,17 @@ class InputBoxArray:
   def build_tree(self):
       for row in self.box_array:
         name = row[0].getText()
-        duration = int(row[1].getText())
+        #catches any invalid inputs
+        try:
+          duration = int(row[1].getText())
+        except:
+          duration = 1
         predecessors = row[2].getText().split(",")
-        resource = int(row[3].getText())
+        try:
+          resource = int(row[3].getText())
+        except:
+          resource = 1
+        #removes any evidence of start or end nodes
         if predecessors == [''] or predecessors == ['START'] or predecessors == ['END']:
           predecessors = []
         if name != "START" and name != "END":
