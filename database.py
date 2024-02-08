@@ -2,10 +2,6 @@ import sqlite3
 #import argon2
 import pickle
 
-#do the argon khalyl thingymabob to be able to code in here and amongus
-
-#remember to add commits and closes
-
 def btecArgon(plaintext):
   hash = plaintext
   return hash

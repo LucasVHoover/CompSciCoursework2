@@ -9,13 +9,16 @@ import logic
 #from argon2 import PasswordHasher
 #ph = PasswordHasher()
 
+#Initialising constants
 pygame.init()
 WIN = pygame.display.set_mode((1500,800))
 pygame.display.set_caption('Hello World!')
 FPS = 60
 clock = pygame.time.Clock()
 
+#creates tables
 database.initialiseTables()
+
 
 connection = sqlite3.connect("activity-tables.db")
 cursor = connection.cursor()
@@ -49,6 +52,7 @@ example = [['A',7, [], [], None, None, 0, 1],
   ['K',  8, ['I'],[], None, None,0,1],
   ['L',  12, ['J', 'K'],[], None, None,0,1]]
 
+#sets constants
 MENU = 0
 
 #MENU 0 - Start Menu
@@ -60,7 +64,9 @@ MENU = 0
 
 logged_in = False
 
-#MENU 0 -------------------------------------------------------------------------------------------------------------------
+#MENU 0 --------------------------------------------------------------------------------------------------------
+
+#initialises classes
 
 New_Tree = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2, "New Tree", (0,0,0), (255,255,255), None)
 Load_Tree = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/2+50, "Load Tree", (0,0,0), (255,255,255), None)
@@ -78,14 +84,16 @@ ReturnMain = UIelements.Menu_button(1350, 50, "Main Menu", (0,0,0), (255,255,255
 
 #MENU 1 --------------------------------------------------------------------------------------------------------------------
 
+#sets constants
 username = ""
 password = ""
 infoBoxes = []
 accountID = ""
+#initialises classes
 infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3, "Username", (0,0,0), (255,255,255), None))
 infoBoxes.append(UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+100, "Password", (0,0,0), (255,255,255), None))
 
-inputUsername = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/3+20, 100, 40) #these should be resizable. Make this so
+inputUsername = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/3+20, 100, 40)
 inputPassword = UIelements.InputBox(WIN.get_width()/2-50, WIN.get_height()/3+125, 100, 40)
 
 LoginButton = UIelements.Menu_button(WIN.get_width()/2, WIN.get_height()/3+200, "Login", (0,0,0), (255,255,255), None)
@@ -99,7 +107,6 @@ def btecArgon(plaintext):
   return hash
 
 #this shoudld be key.encode() with argon activated
-
 
 def insertHashword(key, value):
     #hashes the input
@@ -219,11 +226,13 @@ def Sign_Up():
         return 1, "", True
 
 #MENU 2 ----------------------------------------------------------------------------------------------------------------------------------------
-  
+
+#initialises classes
 SavedBoxes = UIelements.SaveBoxArray(100,100,500,500,[])
 
 #MENU 3 ----------------------------------------------------------------------------------------------------------------------------------------
 
+#setting constants
 on_screen = []
 
 constraint = 5
@@ -262,7 +271,7 @@ def switchview(view):
     view = 0
   return view
 
-#potential convert this set into dictionary?
+#initialising objects
 
 AddRowButton = UIelements.Menu_button(150, 650, "Add Row", (0,0,0), (255,255,255), None)
 BuildTree = UIelements.Menu_button(150, 600, "Build Tree", (0,0,0), (255,255,255), None)
@@ -342,6 +351,7 @@ def loadTree(name):
 
 #MENU 4 --------------------------------------------------------------------------------------------------------------------------------
 
+#creating image
 helpImage = pygame.image.load("Help-Image.PNG")
 helpImage = pygame.transform.scale(helpImage, (900,500))
 helpmask = pygame.mask.from_surface(helpImage)
@@ -458,7 +468,8 @@ while True:
         
 
 
-    elif MENU == 3:        
+    elif MENU == 3:
+      #shows prompt to put in name to save
         if SavePopup:
             SaveTreeInput.draw(WIN)
             UIelements.blit_text(WIN, "Input the name of the project you wish to save and press enter:", (172,250), pygame.font.Font('freesansbold.ttf', int(32)))
@@ -468,6 +479,7 @@ while True:
                     sys.exit()
                 saveName = SaveTreeInput.handle_event(event)
             if saveName != "":
+              #saves the tree
                 if saveTree(tree, saveName, constraint):
                     inputBoxes.setTree([])
                     tree = inputBoxes.build_tree()
@@ -478,6 +490,7 @@ while True:
                     SavePopup = False
         
         else:
+          #draws all items on the screen
             UIelements.blit_text(WIN, "Task Name", (0,0), pygame.font.Font('freesansbold.ttf', int(16)))
             UIelements.blit_text(WIN, "Duration", (125,0), pygame.font.Font('freesansbold.ttf', int(16)))
             UIelements.blit_text(WIN, "Predecessors", (250,0), pygame.font.Font('freesansbold.ttf', int(16)))
@@ -563,10 +576,12 @@ while True:
                         except:
                             pass
                     if SaveTree.change(mouse, False):
+                      #catches invalid inputs
                         try:
                           constraint = int(inputConstraint.getText())
                         except:
                           constraint = 0
+                      #saves the tree
                         on_screen = []
                         inputBoxes.setTree([])
                         tree = inputBoxes.build_tree() 

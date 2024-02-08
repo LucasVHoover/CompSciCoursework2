@@ -173,48 +173,65 @@ class ActivityNetwork:
     
 class GanttChart(ActivityNetwork):
   def setupclasses(self):
+    #creates the seperation between tasks based on the input width and height
     self.ydif = self.height/(len(self.tree) + 2) + ((self.height/(len(self.tree) + 2)/len(self.tree)))
     self.duration = max([each[5] for each in self.tree])
     self.xdif = self.width/self.duration
 
+    #strips the start and end nodes
     for each in self.tree:
       if each[0] == "START" or each[0] == "END":
         self.tree.remove(each)
-    
+
+    #adds all the nodes positions and data into the self.nodes array
     for i in range(len(sorted(self.tree, key = lambda x: x[6]))):
       if self.tree[i][0] != "START" and self.tree[i][0] != "END":
         self.nodes.append([self.xdif*(self.tree[i][4]), self.ydif*(i+1), self.tree[i]])
 
+    #sets how tall each node is on the y axis
     self.Nheight = self.height/(len(self.nodes)*2)
 
+  #draws the nodes
   def draw(self, screen, constraint):
+    #loops through the self.nodes array
     for each in self.nodes:
+      #gets the x and y position the node
       Nx = each[0] + self.x
       Ny = each[1] + self.y
 
+      #sets how tall the node is
       self.Nwidth = each[2][1] * self.xdif
-      
+
+      #sets the text within the node
       Ntext = f"{each[2][0]}: {str(each[2][1])}" 
+      #draws the node
       pygame.draw.rect(screen, (255,255,255), [Nx, Ny - 2.5, self.Nwidth + 2.5, self.Nheight + 2.5])
+      #draws red node if it is critical
       if (each[2][1] + each[2][4]) != each[2][5]:
         pygame.draw.rect(screen, self.Ncolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
       else:
         pygame.draw.rect(screen, self.Ncritcolour, [Nx + 2.5, Ny, self.Nwidth, self.Nheight])
+      #draws the text
       blit_text(screen, Ntext, (Nx + 2.5 ,Ny + 1), pygame.font.Font('freesansbold.ttf', int(16)))
 
   def draw_arrows(self, screen):
+    #loops through the nodes in self.nodes
     for examinednode in self.nodes:
+      #gets the successors of each node
       successors_x_y = []
       successors = examinednode[2][3]
+      #finds the position of each node
       for nodes in self.nodes:
         for each in successors:
           if nodes[2][0] == each:
             successors_x_y.append((nodes[0] + self.x,nodes[1] + self.Nheight/2 + self.y))
+      #draws an arrow between this node and its sucessors
       for items in successors_x_y:
         pygame.draw.line(screen, self.Lcolour, (examinednode[0] + (examinednode[2][1]*self.xdif) + self.x, examinednode[1] + self.Nheight/2 + self.y), (examinednode[0] + (examinednode[2][1]*self.xdif + self.x) + self.y, items[1]), self.Lwidth)
         
         pygame.draw.line(screen, self.Lcolour, ((examinednode[0] + (examinednode[2][1]*self.xdif + self.x), items[1])), items, self.Lwidth)
 
+  #draws the scale
   def draw_scale(self, screen):
     #scale in steps of 5
     length = max([each[5] for each in self.tree])
@@ -225,12 +242,8 @@ class GanttChart(ActivityNetwork):
     for i in range(points + 1):
       pygame.draw.line(screen, (255,255,255), (scale*i + self.x, (self.ydif + self.y - 20 + self.height)), (scale*i + self.x, (self.ydif -10 + self.y + self.height)), 10)
       blit_text(screen, str(5 * i), (scale*i + self.x, (self.ydif + self.y - 30 + self.height)), pygame.font.Font('freesansbold.ttf', int(16)))
-        
-  #should make scale lines for x and y axis method
 
 class ResourceHistogram(ActivityNetwork):
-  #put constraint into self setup init super
-
   def setupclasses(self):
     pass
 
@@ -240,8 +253,10 @@ class ResourceHistogram(ActivityNetwork):
   def draw(self, screen, constraint):
     self.xdif = self.width/max([each[5] for each in self.tree])
     self.ydif = self.height/(max([each[7] for each in self.tree])+self.maxheight) #rebuild this at somepoint to find the highest point of resource usage within the histogram instead of this hacky solution *****
-    
+
+    #loops from 0 - the total tree duration
     for i in range(max([each[5] for each in self.tree]) + 1):
+      #gets all of the currently active tasks at a point in time (i) in the set array
       set = []
       for each in self.tree:
         if i > each[4] and i <= (each[4] + each[1]):
@@ -249,16 +264,17 @@ class ResourceHistogram(ActivityNetwork):
             set.append([each[0], each[7], each[5] - each[1] - each[4], (255,0,0)])
           else:
             set.append([each[0], each[7], each[5] - each[1] - each[4], (255,255,255)])
+      #sorts the set by whether it is critical or not
       set = sorted(set, key = lambda x: x[2])
       height = 0
+      #draws the tasks in the set array
       for each in set:
         pygame.draw.rect(screen, each[3], [self.x + (self.xdif*(i-1)), self.y + (self.height - (self.ydif*height) - self.ydif*each[1]), self.xdif, self.ydif*each[1]], 0)
         blit_text(screen, each[0], (self.x + (self.xdif*(i-1)), self.y + (self.height - (self.ydif*height) - self.ydif*each[1])), pygame.font.Font('freesansbold.ttf'), int(16))
         height += each[1]
     pygame.draw.line(screen, (0,255,0), (self.x, self.y + (self.height - self.ydif*constraint - 5)), (self.x + self.width, self.y + (self.height - self.ydif*constraint - 5)), 5)
 
-      #make labels, add colour coding maybe?
-
+  #draws the scale
   def draw_scale(self, screen):
     #scale in steps of 5
     length = max([each[5] for each in self.tree])
@@ -296,9 +312,7 @@ class InputBox:
           self.color = self.colourActive if self.active else self.colourInactive
       if event.type == pygame.KEYDOWN:
           if self.active:
-              #if event.key == pygame.K_RETURN:
-              #    print(self.text)
-              #    self.text = ''
+            #gets text input
               if event.key == pygame.K_BACKSPACE:
                   self.text = self.text[:-1]
               elif self.txt_surface.get_width() + 10 < self.rect.w:
@@ -307,17 +321,13 @@ class InputBox:
               # Re-render the text.
               self.txt_surface = self.FONT.render(self.text, True, self.color)
 
- # def update(self):
-      # Resize the box if the text is too long.
- #     width = max(200, self.txt_surface.get_width()+10)
- #     self.rect.w = width
-
   def draw(self, screen):
       # Blit the text.
       screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
       # Blit the rect.
       pygame.draw.rect(screen, self.color, self.rect, 2)
-
+    
+  #getters and setters
   def getY(self):
     return self.rect.y
 
@@ -346,13 +356,16 @@ class PopupInputBox(InputBox):
               self.active = False
           # Change the current color of the input box.
           self.color = self.colourActive if self.active else self.colourInactive
+        #detects input
       if event.type == pygame.KEYDOWN:
           if self.active:
+            #outputs on a return input
               if event.key == pygame.K_RETURN:
                   output = self.text
                   self.text = ""
                   self.txt_surface = self.FONT.render(self.text, True, self.color)
                   return output
+                #detects text input
               if event.key == pygame.K_BACKSPACE:
                   self.text = self.text[:-1]
               elif self.txt_surface.get_width() + 10 < self.rect.w:
